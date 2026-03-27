@@ -17,32 +17,28 @@ public class LookupItem : IEquatable<LookupItem>
 {
     public string ShortValue { get; set; } = string.Empty;
     public string LongValue { get; set; } = string.Empty;
-
-    public string UiSymbol
-    {
-        get
-        {
-            return Kind switch
-            {
-                LookupItemKind.Simple => "Copy20",
-                LookupItemKind.EditWindow => "Window24",
-                LookupItemKind.GrabFrame => "PanelBottom20",
-                LookupItemKind.Link => "Link24",
-                LookupItemKind.Command => "WindowConsole20",
-                LookupItemKind.Dynamic => "Flash24",
-                _ => "Copy20",
-            };
-        }
-    }
-
     public LookupItemKind Kind { get; set; } = LookupItemKind.Simple;
+    public HistoryInfo? HistoryItem { get; set; }
 
-    public LookupItem()
+    /// <summary>
+    /// Segoe MDL2 Assets glyph for this item's Kind.
+    /// </summary>
+    public string IconGlyph => Kind switch
     {
+        LookupItemKind.Simple => "\uE8C8",       // Copy
+        LookupItemKind.EditWindow => "\uE8A7",   // OpenWith (window)
+        LookupItemKind.GrabFrame => "\uE71D",    // Picture
+        LookupItemKind.Link => "\uE71B",         // Link
+        LookupItemKind.Command => "\uE756",      // CommandPrompt
+        LookupItemKind.Dynamic => "\uE945",      // Lightning
+        _ => "\uE8C8",
+    };
 
-    }
+    public string FirstLettersString
+        => string.Join("", ShortValue.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Where(s => s.Length > 0).Select(s => s[0])).ToLower();
 
-    public string FirstLettersString => string.Join("", ShortValue.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(s => s[0])).ToLower();
+    public LookupItem() { }
 
     public LookupItem(string sv, string lv)
     {
@@ -53,17 +49,15 @@ public class LookupItem : IEquatable<LookupItem>
     public LookupItem(HistoryInfo historyInfo)
     {
         ShortValue = historyInfo.CaptureDateTime.ToString("F");
-        LongValue = historyInfo.TextContent.Length > 100 ? historyInfo.TextContent[..100].Trim() + "..." : historyInfo.TextContent.Trim();
+        LongValue = historyInfo.TextContent.Length > 100
+            ? historyInfo.TextContent[..100].Trim() + "..."
+            : historyInfo.TextContent.Trim();
 
         HistoryItem = historyInfo;
-
-        if (string.IsNullOrEmpty(historyInfo.ImagePath))
-            Kind = LookupItemKind.EditWindow;
-        else
-            Kind = LookupItemKind.GrabFrame;
+        Kind = string.IsNullOrEmpty(historyInfo.ImagePath)
+            ? LookupItemKind.EditWindow
+            : LookupItemKind.GrabFrame;
     }
-
-    public HistoryInfo? HistoryItem { get; set; }
 
     public override string ToString()
     {
@@ -75,14 +69,44 @@ public class LookupItem : IEquatable<LookupItem>
 
     public string ToCSVString() => $"{ShortValue},{LongValue}";
 
+    public static LookupItem ParseCSVLine(string line)
+    {
+        int commaIndex = line.IndexOf(',');
+        if (commaIndex < 0)
+            return new LookupItem(line.Trim(), string.Empty);
+
+        return new LookupItem(
+            line[..commaIndex].Trim(),
+            line[(commaIndex + 1)..].Trim());
+    }
+
+    public static LookupItem ParseTabLine(string line)
+    {
+        int tabIndex = line.IndexOf('\t');
+        if (tabIndex < 0)
+            return new LookupItem(line.Trim(), string.Empty);
+
+        string shortVal = line[..tabIndex].Trim();
+        string longVal = line[(tabIndex + 1)..].Trim();
+
+        // Detect special kinds from content
+        LookupItemKind kind = LookupItemKind.Simple;
+        if (longVal.StartsWith('>'))
+        {
+            kind = LookupItemKind.Command;
+            longVal = longVal[1..].Trim();
+        }
+        else if (longVal.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        {
+            kind = LookupItemKind.Link;
+        }
+
+        return new LookupItem(shortVal, longVal) { Kind = kind };
+    }
+
     public bool Equals(LookupItem? other)
     {
-        if (other is null)
-            return false;
-
-        if (other.ToString() == ToString())
-            return true;
-
-        return false;
+        if (other is null) return false;
+        return other.ToString() == ToString();
     }
 }

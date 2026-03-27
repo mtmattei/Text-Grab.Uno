@@ -1,24 +1,166 @@
 <Page x:Class="TextGrab.Presentation.QuickLookupPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:utu="using:Uno.Toolkit.UI"
+      xmlns:models="using:TextGrab.Models"
       NavigationCacheMode="Required"
-      Background="{ThemeResource BackgroundBrush}">
+      Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+      KeyDown="Page_KeyDown">
 
-  <Grid>
+  <Grid RowSpacing="0">
     <Grid.RowDefinitions>
-      <RowDefinition Height="Auto" />
-      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />  <!-- Toolbar -->
+      <RowDefinition Height="Auto" />  <!-- Column headers -->
+      <RowDefinition Height="*" />     <!-- List -->
+      <RowDefinition Height="Auto" />  <!-- Status bar -->
     </Grid.RowDefinitions>
 
-    <utu:NavigationBar Content="Quick Lookup" />
+    <!-- ============ TOOLBAR ============ -->
+    <Grid Grid.Row="0" Padding="8" ColumnSpacing="8">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />      <!-- Search -->
+        <ColumnDefinition Width="Auto" />   <!-- Regex toggle -->
+        <ColumnDefinition Width="Auto" />   <!-- Buttons -->
+      </Grid.ColumnDefinitions>
 
-    <Grid Grid.Row="1"
-          HorizontalAlignment="Center"
-          VerticalAlignment="Center">
-      <TextBlock Text="Quick Lookup - search through values"
+      <TextBox x:Name="SearchBox"
+               Grid.Column="0"
+               PlaceholderText="Search..."
+               TextChanged="SearchBox_TextChanged">
+        <TextBox.KeyboardAccelerators>
+          <KeyboardAccelerator Modifiers="Control" Key="Q" />
+        </TextBox.KeyboardAccelerators>
+      </TextBox>
+
+      <ToggleButton x:Name="RegExToggleButton"
+                    Grid.Column="1"
+                    Content=".*"
+                    ToolTipService.ToolTip="Toggle Regex Search (Ctrl+R)"
+                    Click="RegExToggle_Click" />
+
+      <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4">
+        <Button Content="&#xE8E5;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                ToolTipService.ToolTip="Open CSV"
+                Click="OpenCSV_Click" />
+        <Button Content="&#xE77F;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                ToolTipService.ToolTip="Paste Data"
+                Click="PasteData_Click" />
+        <Button x:Name="SaveButton"
+                Content="&#xE74E;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                ToolTipService.ToolTip="Save CSV (Ctrl+S)"
+                Click="SaveCSV_Click"
+                Visibility="Collapsed" />
+        <Button Content="&#xE8C8;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                ToolTipService.ToolTip="Copy Selected (Enter)"
+                Click="CopySelected_Click" />
+      </StackPanel>
+    </Grid>
+
+    <!-- ============ COLUMN HEADERS ============ -->
+    <Grid Grid.Row="1" Padding="16,4,16,4"
+          Background="{ThemeResource SurfaceVariantBrush}">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="32" />
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="2*" />
+      </Grid.ColumnDefinitions>
+
+      <TextBlock Grid.Column="0" Text="" Opacity="0.6" FontSize="11" />
+      <TextBlock Grid.Column="1" Text="Key" Opacity="0.6" FontSize="11" FontWeight="SemiBold" />
+      <TextBlock Grid.Column="2" Text="Value" Opacity="0.6" FontSize="11" FontWeight="SemiBold" />
+    </Grid>
+
+    <!-- ============ ITEMS LIST ============ -->
+    <ListView x:Name="ItemsListView"
+              Grid.Row="2"
+              SelectionMode="Extended"
+              IsItemClickEnabled="True"
+              ItemClick="ItemsListView_ItemClick"
+              DoubleTapped="ItemsListView_DoubleTapped">
+
+      <ListView.ItemTemplate>
+        <DataTemplate x:DataType="models:LookupItem">
+          <Grid Padding="0,4" ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="32" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
+
+            <Grid.ContextFlyout>
+              <MenuFlyout>
+                <MenuFlyoutItem Text="Copy Value" Click="CopyValue_Click" />
+                <MenuFlyoutItem Text="Copy Key" Click="CopyKey_Click" />
+                <MenuFlyoutItem Text="Copy Both" Click="CopyBoth_Click" />
+                <MenuFlyoutSeparator />
+                <MenuFlyoutItem Text="Delete" Click="DeleteItem_Click" />
+              </MenuFlyout>
+            </Grid.ContextFlyout>
+
+            <!-- Icon -->
+            <FontIcon Grid.Column="0"
+                      Glyph="{x:Bind IconGlyph}"
+                      FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                      FontSize="14"
+                      Opacity="0.6"
+                      VerticalAlignment="Center" />
+
+            <!-- Short Value -->
+            <TextBlock Grid.Column="1"
+                       Text="{x:Bind ShortValue}"
+                       TextTrimming="CharacterEllipsis"
+                       VerticalAlignment="Center" />
+
+            <!-- Long Value -->
+            <TextBlock Grid.Column="2"
+                       Text="{x:Bind LongValue}"
+                       TextTrimming="CharacterEllipsis"
+                       VerticalAlignment="Center"
+                       Opacity="0.8" />
+          </Grid>
+        </DataTemplate>
+      </ListView.ItemTemplate>
+    </ListView>
+
+    <!-- Empty state -->
+    <StackPanel x:Name="EmptyState"
+                Grid.Row="2"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Spacing="12"
+                Visibility="Visible">
+      <FontIcon Glyph="&#xE8FD;"
+                FontSize="48"
+                Opacity="0.4" />
+      <TextBlock Text="Open a CSV or paste data to get started"
                  Style="{StaticResource TitleMedium}"
-                 Opacity="0.6" />
+                 Opacity="0.6"
+                 HorizontalAlignment="Center" />
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8">
+        <Button Content="Open CSV" Click="OpenCSV_Click" />
+        <Button Content="Paste Data" Click="PasteData_Click" />
+      </StackPanel>
+    </StackPanel>
+
+    <!-- ============ STATUS BAR ============ -->
+    <Grid Grid.Row="3" Padding="12,6"
+          Background="{ThemeResource SurfaceVariantBrush}">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+
+      <TextBlock x:Name="StatusBarText"
+                 Grid.Column="0"
+                 Text="Load a CSV or paste data"
+                 Style="{StaticResource LabelSmall}"
+                 VerticalAlignment="Center" />
+
+      <TextBlock x:Name="ItemCountText"
+                 Grid.Column="1"
+                 Text="0 items"
+                 Style="{StaticResource LabelSmall}"
+                 VerticalAlignment="Center"
+                 Opacity="0.7" />
     </Grid>
   </Grid>
 </Page>
