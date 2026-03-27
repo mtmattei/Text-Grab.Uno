@@ -1,0 +1,197 @@
+<Page x:Class="TextGrab.Presentation.GrabFramePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:utu="using:Uno.Toolkit.UI"
+      xmlns:controls="using:TextGrab.Controls"
+      NavigationCacheMode="Required"
+      Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+      KeyDown="Page_KeyDown"
+      KeyUp="Page_KeyUp">
+
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />  <!-- Menu bar -->
+      <RowDefinition Height="*" />     <!-- Canvas area -->
+      <RowDefinition Height="Auto" />  <!-- Bottom bar -->
+    </Grid.RowDefinitions>
+
+    <!-- ============ TOP: MENU BAR ============ -->
+    <MenuBar Grid.Row="0">
+      <MenuBarItem Title="File">
+        <MenuFlyoutItem Text="Open Image..." Click="OpenImage_Click">
+          <MenuFlyoutItem.KeyboardAccelerators>
+            <KeyboardAccelerator Modifiers="Control" Key="O" />
+          </MenuFlyoutItem.KeyboardAccelerators>
+        </MenuFlyoutItem>
+        <MenuFlyoutItem Text="Paste Image" Click="PasteImage_Click">
+          <MenuFlyoutItem.KeyboardAccelerators>
+            <KeyboardAccelerator Modifiers="Control,Shift" Key="V" />
+          </MenuFlyoutItem.KeyboardAccelerators>
+        </MenuFlyoutItem>
+        <MenuFlyoutSeparator />
+        <MenuFlyoutItem Text="Send to Edit Window" Click="SendToEditWindow_Click">
+          <MenuFlyoutItem.KeyboardAccelerators>
+            <KeyboardAccelerator Modifiers="Control" Key="E" />
+          </MenuFlyoutItem.KeyboardAccelerators>
+        </MenuFlyoutItem>
+      </MenuBarItem>
+
+      <MenuBarItem Title="Edit">
+        <MenuFlyoutItem Text="Select All" Click="SelectAll_Click">
+          <MenuFlyoutItem.KeyboardAccelerators>
+            <KeyboardAccelerator Modifiers="Control" Key="A" />
+          </MenuFlyoutItem.KeyboardAccelerators>
+        </MenuFlyoutItem>
+        <MenuFlyoutItem Text="Invert Selection" Click="InvertSelection_Click" />
+        <MenuFlyoutSeparator />
+        <MenuFlyoutItem Text="Merge Selected" Click="MergeSelected_Click">
+          <MenuFlyoutItem.KeyboardAccelerators>
+            <KeyboardAccelerator Modifiers="Control" Key="M" />
+          </MenuFlyoutItem.KeyboardAccelerators>
+        </MenuFlyoutItem>
+        <MenuFlyoutItem Text="Delete Selected" Click="DeleteSelected_Click">
+          <MenuFlyoutItem.KeyboardAccelerators>
+            <KeyboardAccelerator Key="Delete" />
+          </MenuFlyoutItem.KeyboardAccelerators>
+        </MenuFlyoutItem>
+        <MenuFlyoutSeparator />
+        <MenuFlyoutItem Text="Refresh OCR" Click="RefreshOcr_Click">
+          <MenuFlyoutItem.KeyboardAccelerators>
+            <KeyboardAccelerator Key="F5" />
+          </MenuFlyoutItem.KeyboardAccelerators>
+        </MenuFlyoutItem>
+      </MenuBarItem>
+
+      <MenuBarItem Title="View">
+        <ToggleMenuFlyoutItem x:Name="TableModeToggle" Text="Table Mode"
+                              Click="TableModeToggle_Click" />
+        <ToggleMenuFlyoutItem x:Name="EditModeToggle" Text="Edit Words" IsChecked="True"
+                              Click="EditModeToggle_Click" />
+      </MenuBarItem>
+    </MenuBar>
+
+    <!-- ============ CENTER: IMAGE + CANVAS ============ -->
+    <utu:ZoomContentControl x:Name="MainZoomControl"
+                            Grid.Row="1"
+                            MinZoomLevel="0.1"
+                            MaxZoomLevel="10"
+                            IsZoomAllowed="True">
+
+      <Viewbox x:Name="CanvasViewBox" Stretch="Uniform">
+        <Grid x:Name="CanvasContainer">
+          <!-- Background image -->
+          <Image x:Name="GrabFrameImage"
+                 Stretch="Uniform" />
+
+          <!-- Canvas for WordBorder overlays -->
+          <Canvas x:Name="RectanglesCanvas"
+                  Background="Transparent"
+                  PointerPressed="RectanglesCanvas_PointerPressed"
+                  PointerMoved="RectanglesCanvas_PointerMoved"
+                  PointerReleased="RectanglesCanvas_PointerReleased">
+
+            <!-- Selection rectangle (drawn during drag) -->
+            <Border x:Name="SelectBorder"
+                    BorderBrush="{ThemeResource SystemAccentColor}"
+                    BorderThickness="2"
+                    Background="#20308E98"
+                    Visibility="Collapsed" />
+          </Canvas>
+        </Grid>
+      </Viewbox>
+    </utu:ZoomContentControl>
+
+    <!-- Empty state overlay -->
+    <Grid x:Name="EmptyStateOverlay"
+          Grid.Row="1"
+          HorizontalAlignment="Center"
+          VerticalAlignment="Center"
+          Visibility="Visible">
+      <StackPanel HorizontalAlignment="Center" Spacing="12">
+        <FontIcon Glyph="&#xE8B9;"
+                  FontSize="48"
+                  Opacity="0.4" />
+        <TextBlock Text="Open or paste an image to start OCR"
+                   Style="{StaticResource TitleMedium}"
+                   Opacity="0.6"
+                   HorizontalAlignment="Center" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8">
+          <Button Content="Open Image" Click="OpenImage_Click" />
+          <Button Content="Paste Image" Click="PasteImage_Click" />
+        </StackPanel>
+      </StackPanel>
+    </Grid>
+
+    <!-- ============ BOTTOM BAR ============ -->
+    <Grid Grid.Row="2" Padding="8,4" ColumnSpacing="8">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" />   <!-- Search -->
+        <ColumnDefinition Width="Auto" />   <!-- Match count -->
+        <ColumnDefinition Width="*" />      <!-- spacer -->
+        <ColumnDefinition Width="Auto" />   <!-- Language -->
+        <ColumnDefinition Width="Auto" />   <!-- Buttons -->
+      </Grid.ColumnDefinitions>
+
+      <!-- Search box -->
+      <TextBox x:Name="SearchBox"
+               Grid.Column="0"
+               PlaceholderText="Search (regex)..."
+               MinWidth="200"
+               TextChanged="SearchBox_TextChanged">
+        <TextBox.KeyboardAccelerators>
+          <KeyboardAccelerator Modifiers="Control" Key="F" />
+        </TextBox.KeyboardAccelerators>
+      </TextBox>
+
+      <TextBlock x:Name="MatchCountText"
+                 Grid.Column="1"
+                 VerticalAlignment="Center"
+                 Opacity="0.6"
+                 Text="0 matches" />
+
+      <!-- Language combo -->
+      <ComboBox x:Name="LanguagesComboBox"
+                Grid.Column="3"
+                MinWidth="140"
+                DisplayMemberPath="DisplayName"
+                SelectionChanged="LanguagesComboBox_SelectionChanged" />
+
+      <!-- Action buttons -->
+      <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="4">
+        <Button x:Name="RefreshButton"
+                Content="&#xE72C;"
+                FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                ToolTipService.ToolTip="Refresh OCR"
+                Click="RefreshOcr_Click" />
+        <ToggleButton x:Name="TableToggleButton"
+                      Content="&#xE80A;"
+                      FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                      ToolTipService.ToolTip="Table Mode"
+                      Click="TableModeToggle_Click" />
+        <ToggleButton x:Name="EditToggleButton"
+                      Content="&#xE70F;"
+                      FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                      ToolTipService.ToolTip="Edit Words"
+                      IsChecked="True"
+                      Click="EditModeToggle_Click" />
+        <Button x:Name="CopyButton"
+                Content="&#xE8C8;"
+                FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                ToolTipService.ToolTip="Copy Selected Text"
+                Click="CopyText_Click">
+          <Button.KeyboardAccelerators>
+            <KeyboardAccelerator Modifiers="Control" Key="C" />
+          </Button.KeyboardAccelerators>
+        </Button>
+      </StackPanel>
+    </Grid>
+
+    <!-- Status bar -->
+    <Border Grid.Row="2" VerticalAlignment="Bottom" Padding="8,2">
+      <TextBlock x:Name="StatusBarText"
+                 Text="Load an image to start OCR"
+                 Opacity="0.5"
+                 FontSize="11" />
+    </Border>
+  </Grid>
+</Page>

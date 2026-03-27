@@ -1,0 +1,10 @@
+{
+  "background_color": "#ffffff",
+  "description": "TextGrab.Uno",
+  "display": "standalone",
+  "name": "TextGrab.Uno",
+  "short_name": "TextGrab.Uno",
+  "start_url": "/index.html",
+  "theme_color": "#ffffff",
+  "scope": "/"
+}

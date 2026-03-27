@@ -1,0 +1,66 @@
+<ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+  <ResourceDictionary.ThemeDictionaries>
+    <!-- Light theme with teal primary derived from Text-Grab's #308E98 -->
+    <ResourceDictionary x:Key="Light">
+      <Color x:Key="PrimaryColor">#308E98</Color>
+      <Color x:Key="OnPrimaryColor">#FFFFFF</Color>
+      <Color x:Key="PrimaryContainerColor">#A8E8EF</Color>
+      <Color x:Key="OnPrimaryContainerColor">#001F23</Color>
+      <Color x:Key="SecondaryColor">#4A6366</Color>
+      <Color x:Key="OnSecondaryColor">#FFFFFF</Color>
+      <Color x:Key="SecondaryContainerColor">#CCE8EC</Color>
+      <Color x:Key="OnSecondaryContainerColor">#051F22</Color>
+      <Color x:Key="TertiaryColor">#4F5F7E</Color>
+      <Color x:Key="OnTertiaryColor">#FFFFFF</Color>
+      <Color x:Key="TertiaryContainerColor">#D6E3FF</Color>
+      <Color x:Key="OnTertiaryContainerColor">#091B37</Color>
+      <Color x:Key="ErrorColor">#BA1A1A</Color>
+      <Color x:Key="ErrorContainerColor">#FFDAD6</Color>
+      <Color x:Key="OnErrorColor">#FFFFFF</Color>
+      <Color x:Key="OnErrorContainerColor">#410002</Color>
+      <Color x:Key="BackgroundColor">#FAFDFD</Color>
+      <Color x:Key="OnBackgroundColor">#191C1D</Color>
+      <Color x:Key="SurfaceColor">#FAFDFD</Color>
+      <Color x:Key="OnSurfaceColor">#191C1D</Color>
+      <Color x:Key="SurfaceVariantColor">#DAE4E6</Color>
+      <Color x:Key="OnSurfaceVariantColor">#3F4849</Color>
+      <Color x:Key="OutlineColor">#6F797A</Color>
+      <Color x:Key="OnSurfaceInverseColor">#EFF1F1</Color>
+      <Color x:Key="SurfaceInverseColor">#2E3132</Color>
+      <Color x:Key="PrimaryInverseColor">#4CD9E5</Color>
+      <Color x:Key="SurfaceTintColor">#308E98</Color>
+      <Color x:Key="OutlineVariantColor">#BEC8CA</Color>
+    </ResourceDictionary>
+    <!-- Dark theme (default) — Text-Grab's primary identity -->
+    <ResourceDictionary x:Key="Dark">
+      <Color x:Key="PrimaryColor">#4CD9E5</Color>
+      <Color x:Key="OnPrimaryColor">#003539</Color>
+      <Color x:Key="PrimaryContainerColor">#18474C</Color>
+      <Color x:Key="OnPrimaryContainerColor">#A8E8EF</Color>
+      <Color x:Key="SecondaryColor">#B0CCD0</Color>
+      <Color x:Key="OnSecondaryColor">#1B3437</Color>
+      <Color x:Key="SecondaryContainerColor">#324B4E</Color>
+      <Color x:Key="OnSecondaryContainerColor">#CCE8EC</Color>
+      <Color x:Key="TertiaryColor">#B6C7EA</Color>
+      <Color x:Key="OnTertiaryColor">#20314D</Color>
+      <Color x:Key="TertiaryContainerColor">#374765</Color>
+      <Color x:Key="OnTertiaryContainerColor">#D6E3FF</Color>
+      <Color x:Key="ErrorColor">#FFB4AB</Color>
+      <Color x:Key="ErrorContainerColor">#93000A</Color>
+      <Color x:Key="OnErrorColor">#690005</Color>
+      <Color x:Key="OnErrorContainerColor">#FFDAD6</Color>
+      <Color x:Key="BackgroundColor">#191C1D</Color>
+      <Color x:Key="OnBackgroundColor">#E1E3E3</Color>
+      <Color x:Key="SurfaceColor">#111415</Color>
+      <Color x:Key="OnSurfaceColor">#E1E3E3</Color>
+      <Color x:Key="SurfaceVariantColor">#3F4849</Color>
+      <Color x:Key="OnSurfaceVariantColor">#BEC8CA</Color>
+      <Color x:Key="OutlineColor">#889394</Color>
+      <Color x:Key="OnSurfaceInverseColor">#191C1D</Color>
+      <Color x:Key="SurfaceInverseColor">#E1E3E3</Color>
+      <Color x:Key="PrimaryInverseColor">#308E98</Color>
+      <Color x:Key="SurfaceTintColor">#4CD9E5</Color>
+      <Color x:Key="OutlineVariantColor">#3F4849</Color>
+    </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>
