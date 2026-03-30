@@ -12,13 +12,13 @@
 
       <!-- Welcome -->
       <TextBlock Text="Welcome to Text Grab!"
-                 Style="{StaticResource TitleLargeTextBlockStyle}"
+                 Style="{StaticResource TitleLarge}"
                  HorizontalAlignment="Center"
                  FontSize="32"
                  Margin="0,0,0,16" />
 
       <TextBlock TextWrapping="Wrap"
-                 Style="{StaticResource BodyTextBlockStyle}"
+                 Style="{StaticResource BodyMedium}"
                  HorizontalAlignment="Center"
                  MaxWidth="600"
                  TextAlignment="Center"
@@ -28,7 +28,7 @@
 
       <!-- Default Launch Window selection -->
       <TextBlock Text="Default Launch Window"
-                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Style="{StaticResource TitleMedium}"
                  HorizontalAlignment="Center"
                  Margin="0,8,0,12" />
 
@@ -144,52 +144,52 @@
 
       <!-- How Full-Screen works -->
       <TextBlock Text="How Full-Screen works"
-                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Style="{StaticResource TitleMedium}"
                  HorizontalAlignment="Center"
                  Margin="0,32,0,8" />
       <TextBlock TextWrapping="Wrap" MaxWidth="600" HorizontalAlignment="Center"
-                 Style="{StaticResource BodyTextBlockStyle}">
+                 Style="{StaticResource BodyMedium}">
         Like a screenshot tool but instead of a photo you get the text within the selection. Draw a rectangle around the text you wish to copy, or click on a single word. Both methods use the built-in OCR engine. When text is recognized it gets put in your clipboard. Paste using Ctrl+V into any program.
       </TextBlock>
 
       <!-- How Grab Frame works -->
       <TextBlock Text="How Grab Frame works"
-                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Style="{StaticResource TitleMedium}"
                  HorizontalAlignment="Center"
                  Margin="0,24,0,8" />
       <TextBlock TextWrapping="Wrap" MaxWidth="600" HorizontalAlignment="Center"
-                 Style="{StaticResource BodyTextBlockStyle}">
+                 Style="{StaticResource BodyMedium}">
         The Grab Frame is a window which can be moved or resized. It stays on top and reads all text within the border. Click or drag to select Word Borders, then add them to the clipboard by clicking "Grab". Drop an image onto the Grab Frame to view and copy text. Edit each line to correct errors. Table mode draws a grid for easy pasting into tables.
       </TextBlock>
 
       <!-- Edit Text Window -->
       <TextBlock Text="What the Edit Text Window can do"
-                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Style="{StaticResource TitleMedium}"
                  HorizontalAlignment="Center"
                  Margin="0,24,0,8" />
       <TextBlock TextWrapping="Wrap" MaxWidth="600" HorizontalAlignment="Center"
-                 Style="{StaticResource BodyTextBlockStyle}">
+                 Style="{StaticResource BodyMedium}">
         Similar to Notepad, the Edit Text Window is a "Pure Text" editing experience with no formatting. Several tools make it quick and easy to fix or change text: make text into a single line, toggle case, trim spaces, isolate selected text, replace reserved characters, find and replace, extract regular expressions, and more.
       </TextBlock>
 
       <!-- Quick Simple Lookup -->
       <TextBlock Text="Where does Quick Simple Lookup fit in?"
-                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Style="{StaticResource TitleMedium}"
                  HorizontalAlignment="Center"
                  Margin="0,24,0,8" />
       <TextBlock TextWrapping="Wrap" MaxWidth="600" HorizontalAlignment="Center"
-                 Style="{StaticResource BodyTextBlockStyle}">
+                 Style="{StaticResource BodyMedium}">
         Unlike Full-Screen or Grab Frame, Quick Simple Lookup does not use OCR. It's fast to launch and load the lookup table. Search for any item to filter results quickly. Press Enter to copy the lookup value and close the window in a snap, then paste into the app you need.
       </TextBlock>
 
       <!-- Application Options -->
       <TextBlock Text="Application Options"
-                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Style="{StaticResource TitleMedium}"
                  HorizontalAlignment="Center"
                  Margin="0,32,0,8" />
 
       <TextBlock TextWrapping="Wrap" MaxWidth="600" HorizontalAlignment="Center"
-                 Style="{StaticResource BodyTextBlockStyle}">
+                 Style="{StaticResource BodyMedium}">
         Clicking on notifications puts the copied text into an Edit Text Window to be copied, corrected, changed, or amended.
       </TextBlock>
       <ToggleSwitch x:Name="NotificationsToggle"
@@ -199,7 +199,7 @@
                     Margin="0,8,0,0" />
 
       <TextBlock TextWrapping="Wrap" MaxWidth="600" HorizontalAlignment="Center"
-                 Style="{StaticResource BodyTextBlockStyle}"
+                 Style="{StaticResource BodyMedium}"
                  Margin="0,8,0,0">
         Running in the background enables shortcut keys and faster launch times.
       </TextBlock>
@@ -209,7 +209,7 @@
                     Header="Run Text Grab in the background" />
 
       <TextBlock TextWrapping="Wrap" MaxWidth="600" HorizontalAlignment="Center"
-                 Style="{StaticResource BodyTextBlockStyle}"
+                 Style="{StaticResource BodyMedium}"
                  Margin="0,8,0,0">
         Launching Text Grab on startup keeps the app ready for quick access.
       </TextBlock>
@@ -221,11 +221,11 @@
 
       <!-- How Text Grab is Different -->
       <TextBlock Text="How Text Grab is Different"
-                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Style="{StaticResource TitleMedium}"
                  HorizontalAlignment="Center"
                  Margin="0,24,0,8" />
       <TextBlock TextWrapping="Wrap" MaxWidth="600" HorizontalAlignment="Center"
-                 Style="{StaticResource BodyTextBlockStyle}">
+                 Style="{StaticResource BodyMedium}">
         Text Grab was designed with speed, efficiency, and privacy in mind. By using the built-in OCR engine, Text Grab respects users' privacy and does not transmit data regarding the copied text. I hope you find Text Grab as useful as I do.
       </TextBlock>
       <HyperlinkButton HorizontalAlignment="Center"

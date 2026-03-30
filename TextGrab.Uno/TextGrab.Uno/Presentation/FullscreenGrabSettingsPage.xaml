@@ -7,14 +7,14 @@
     <StackPanel Spacing="4" Padding="20,12,40,40">
 
       <TextBlock Text="Fullscreen Grab Settings"
-                 Style="{StaticResource TitleLargeTextBlockStyle}" />
+                 Style="{StaticResource TitleLarge}" />
 
       <!-- Start mode -->
       <TextBlock Text="Defaults"
-                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Style="{StaticResource TitleMedium}"
                  Margin="0,16,0,4" />
       <TextBlock Text="Start mode:"
-                 Style="{StaticResource BodyTextBlockStyle}" />
+                 Style="{StaticResource BodyMedium}" />
       <RadioButtons x:Name="StartModeRadioButtons"
                     SelectionChanged="StartModeRadioButtons_SelectionChanged"
                     Margin="0,4,0,0">
@@ -23,7 +23,7 @@
         <RadioButton Content="Table" Tag="Table" />
       </RadioButtons>
       <TextBlock Text="Single Line outputs captures as a single line. Table mode requires Windows OCR/AI languages."
-                 Style="{StaticResource BodyTextBlockStyle}"
+                 Style="{StaticResource BodyMedium}"
                  Opacity="0.7"
                  TextWrapping="Wrap"
                  Margin="24,4,0,8" />
@@ -33,7 +33,7 @@
                     Toggled="SendToEtwToggle_Toggled"
                     Header="Send output to Edit Text Window by default" />
       <TextBlock Text="Automatically route captured text into the Edit Text Window."
-                 Style="{StaticResource BodyTextBlockStyle}"
+                 Style="{StaticResource BodyMedium}"
                  Opacity="0.7"
                  Margin="24,0,0,8" />
 
@@ -42,13 +42,13 @@
                     Toggled="ShadeOverlayToggle_Toggled"
                     Header="Dim screen with translucent overlay while selecting" />
       <TextBlock Text="Controls the transparent overlay shown during Fullscreen Grab selection."
-                 Style="{StaticResource BodyTextBlockStyle}"
+                 Style="{StaticResource BodyMedium}"
                  Opacity="0.7"
                  Margin="24,0,0,8" />
 
       <!-- Post-capture insert -->
       <TextBlock Text="Post-capture insert"
-                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Style="{StaticResource TitleMedium}"
                  Margin="0,16,0,4" />
       <ToggleSwitch x:Name="TryInsertToggle"
                     Toggled="TryInsertToggle_Toggled"
@@ -56,7 +56,7 @@
       <StackPanel Orientation="Horizontal" Margin="24,8,0,0" Spacing="12">
         <TextBlock Text="Insert delay (seconds):"
                    VerticalAlignment="Center"
-                   Style="{StaticResource BodyTextBlockStyle}" />
+                   Style="{StaticResource BodyMedium}" />
         <Slider x:Name="InsertDelaySlider"
                 Width="200"
                 Minimum="0"
@@ -66,10 +66,10 @@
                 ValueChanged="InsertDelaySlider_ValueChanged" />
         <TextBlock x:Name="InsertDelayValueText"
                    VerticalAlignment="Center"
-                   Style="{StaticResource BodyTextBlockStyle}" />
+                   Style="{StaticResource BodyMedium}" />
       </StackPanel>
       <TextBlock Text="How long to wait before simulating paste (Ctrl+V)."
-                 Style="{StaticResource BodyTextBlockStyle}"
+                 Style="{StaticResource BodyMedium}"
                  Opacity="0.7"
                  Margin="24,2,0,0" />
 

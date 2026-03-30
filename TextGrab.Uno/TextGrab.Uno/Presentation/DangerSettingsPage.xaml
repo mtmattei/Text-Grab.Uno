@@ -8,11 +8,11 @@
     <StackPanel Spacing="4" Padding="20,12,40,40">
 
       <TextBlock Text="Dangerous Options"
-                 Style="{StaticResource TitleLargeTextBlockStyle}" />
+                 Style="{StaticResource TitleLarge}" />
 
       <!-- Shutdown -->
       <TextBlock Text="Shutdown Text Grab."
-                 Style="{StaticResource BodyTextBlockStyle}"
+                 Style="{StaticResource BodyMedium}"
                  Margin="0,12,0,0" />
       <controls:CollapsibleButton x:Name="ShutdownButton"
                                   ButtonText="Shutdown Text Grab"
@@ -21,7 +21,7 @@
 
       <!-- Export Bug Report -->
       <TextBlock Text="Generate bug report with app diagnostic information."
-                 Style="{StaticResource BodyTextBlockStyle}"
+                 Style="{StaticResource BodyMedium}"
                  Margin="0,12,0,0" />
       <controls:CollapsibleButton x:Name="ExportBugReportButton"
                                   ButtonText="Export Bug Report"
@@ -30,7 +30,7 @@
 
       <!-- Export Settings -->
       <TextBlock Text="Export all settings to a file."
-                 Style="{StaticResource BodyTextBlockStyle}"
+                 Style="{StaticResource BodyMedium}"
                  Margin="0,12,0,0" />
       <controls:CollapsibleButton x:Name="ExportSettingsButton"
                                   ButtonText="Export Settings"
@@ -39,7 +39,7 @@
 
       <!-- Import Settings -->
       <TextBlock Text="Import settings from a previously exported file."
-                 Style="{StaticResource BodyTextBlockStyle}"
+                 Style="{StaticResource BodyMedium}"
                  Margin="0,12,0,0" />
       <controls:CollapsibleButton x:Name="ImportSettingsButton"
                                   ButtonText="Import Settings"
@@ -48,7 +48,7 @@
 
       <!-- AI Arch Override -->
       <TextBlock Text="Check CPU Architecture before enabling Windows Local AI model features."
-                 Style="{StaticResource BodyTextBlockStyle}"
+                 Style="{StaticResource BodyMedium}"
                  Margin="0,12,0,0" />
       <ToggleSwitch x:Name="OverrideArchToggle"
                     Toggled="OverrideArchToggle_Toggled"
@@ -57,7 +57,7 @@
 
       <!-- Reset All Settings -->
       <TextBlock Text="Reset all settings to default settings."
-                 Style="{StaticResource BodyTextBlockStyle}"
+                 Style="{StaticResource BodyMedium}"
                  Margin="0,12,0,0" />
       <controls:CollapsibleButton x:Name="ResetSettingsButton"
                                   ButtonText="Reset All Settings"
@@ -66,7 +66,7 @@
 
       <!-- Clear History -->
       <TextBlock Text="Delete all history items."
-                 Style="{StaticResource BodyTextBlockStyle}"
+                 Style="{StaticResource BodyMedium}"
                  Margin="0,12,0,0" />
       <controls:CollapsibleButton x:Name="ClearHistoryButton"
                                   ButtonText="Clear History"
@@ -75,7 +75,7 @@
 
       <!-- Status -->
       <TextBlock x:Name="StatusText"
-                 Style="{StaticResource BodyTextBlockStyle}"
+                 Style="{StaticResource BodyMedium}"
                  Margin="0,16,0,0"
                  Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
 

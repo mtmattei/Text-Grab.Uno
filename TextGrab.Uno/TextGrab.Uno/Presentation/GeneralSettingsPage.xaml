@@ -8,10 +8,10 @@
 
       <!-- Header + Version -->
       <TextBlock Text="General Settings"
-                 Style="{StaticResource TitleLargeTextBlockStyle}" />
+                 Style="{StaticResource TitleLarge}" />
       <TextBlock x:Name="VersionTextBlock"
                  Text="Version 5.0.0"
-                 Style="{StaticResource BodyTextBlockStyle}"
+                 Style="{StaticResource BodyMedium}"
                  Opacity="0.7"
                  Margin="0,0,0,8" />
 
@@ -22,14 +22,14 @@
               Margin="0,0,0,16">
         <StackPanel Spacing="8">
           <TextBlock Text="Hello there!"
-                     Style="{StaticResource TitleMediumTextBlockStyle}" />
-          <TextBlock TextWrapping="Wrap" Style="{StaticResource BodyTextBlockStyle}">
+                     Style="{StaticResource TitleMedium}" />
+          <TextBlock TextWrapping="Wrap" Style="{StaticResource BodyMedium}">
             Thank you for using Text Grab! Building this application is very much a labor of love.
             Feel free to open an issue on GitHub if you have a bug or feature request.
             Happy Text Grabbing!
           </TextBlock>
           <TextBlock Text="- Joe"
-                     Style="{StaticResource BodyTextBlockStyle}"
+                     Style="{StaticResource BodyMedium}"
                      Margin="0,4,0,0" />
           <HyperlinkButton NavigateUri="https://github.com/TheJoeFin/Text-Grab/issues"
                            Content="https://github.com/TheJoeFin/Text-Grab/issues" />
@@ -40,7 +40,7 @@
 
       <!-- Theme -->
       <TextBlock Text="Text Grab Theme"
-                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Style="{StaticResource TitleMedium}"
                  Margin="0,16,0,4" />
       <RadioButtons x:Name="ThemeRadioButtons"
                     SelectionChanged="ThemeRadioButtons_SelectionChanged">
@@ -51,7 +51,7 @@
 
       <!-- Show Notification -->
       <TextBlock Text="Show Notification"
-                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Style="{StaticResource TitleMedium}"
                  Margin="0,16,0,4" />
       <ToggleSwitch x:Name="ShowToastToggle"
                     Toggled="ShowToastToggle_Toggled"
@@ -59,7 +59,7 @@
 
       <!-- Default Launch Window -->
       <TextBlock Text="Default Launch Window"
-                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Style="{StaticResource TitleMedium}"
                  Margin="0,16,0,4" />
       <RadioButtons x:Name="DefaultLaunchRadioButtons"
                     SelectionChanged="DefaultLaunchRadioButtons_SelectionChanged">
@@ -71,7 +71,7 @@
 
       <!-- Run in the background -->
       <TextBlock Text="Run in the background"
-                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Style="{StaticResource TitleMedium}"
                  Margin="0,16,0,4" />
       <ToggleSwitch x:Name="RunInBackgroundToggle"
                     Toggled="RunInBackgroundToggle_Toggled"
@@ -86,18 +86,18 @@
 
       <!-- Barcodes -->
       <TextBlock Text="Read barcodes and QR Codes"
-                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Style="{StaticResource TitleMedium}"
                  Margin="0,16,0,4" />
       <ToggleSwitch x:Name="ReadBarcodesToggle"
                     Toggled="ReadBarcodesToggle_Toggled"
                     Header="Try to read barcodes" />
       <TextBlock Text="Disabling may speed up results"
-                 Style="{StaticResource BodyTextBlockStyle}"
+                 Style="{StaticResource BodyMedium}"
                  Opacity="0.7" />
 
       <!-- Web Search -->
       <TextBlock Text="Web Search Options"
-                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Style="{StaticResource TitleMedium}"
                  Margin="0,16,0,4" />
       <ComboBox x:Name="WebSearchComboBox"
                 Width="300"
@@ -110,7 +110,7 @@
 
       <!-- Correct Common Errors -->
       <TextBlock Text="Correct Common Errors"
-                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Style="{StaticResource TitleMedium}"
                  Margin="0,16,0,4" />
       <ToggleSwitch x:Name="ErrorCorrectToggle"
                     Toggled="ErrorCorrectToggle_Toggled"
@@ -122,7 +122,7 @@
 
       <!-- Clipboard Options -->
       <TextBlock Text="Clipboard Options"
-                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Style="{StaticResource TitleMedium}"
                  Margin="0,16,0,4" />
       <ToggleSwitch x:Name="NeverClipboardToggle"
                     Toggled="NeverClipboardToggle_Toggled"
@@ -134,7 +134,7 @@
 
       <!-- History -->
       <TextBlock Text="History"
-                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Style="{StaticResource TitleMedium}"
                  Margin="0,16,0,4" />
       <ToggleSwitch x:Name="HistoryToggle"
                     Toggled="HistoryToggle_Toggled"

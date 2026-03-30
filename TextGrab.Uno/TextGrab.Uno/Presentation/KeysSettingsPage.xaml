@@ -7,7 +7,7 @@
     <StackPanel Spacing="4" Padding="20,12,40,40">
 
       <TextBlock Text="Shortcut Key Settings"
-                 Style="{StaticResource TitleLargeTextBlockStyle}" />
+                 Style="{StaticResource TitleLarge}" />
 
       <!-- Run in background -->
       <ToggleSwitch x:Name="RunInBackgroundToggle"
@@ -15,7 +15,7 @@
                     Header="Run Text Grab in the background and enable hotkeys"
                     Margin="0,12,0,0" />
       <TextBlock Text="For this setting to take effect, close all instances of Text Grab."
-                 Style="{StaticResource BodyTextBlockStyle}"
+                 Style="{StaticResource BodyMedium}"
                  FontStyle="Italic"
                  Opacity="0.7"
                  Margin="24,0,0,8" />
@@ -33,28 +33,28 @@
                   Visibility="Collapsed">
 
         <TextBlock Text="Hotkey configuration requires the Windows Desktop version."
-                   Style="{StaticResource BodyTextBlockStyle}"
+                   Style="{StaticResource BodyMedium}"
                    Opacity="0.7"
                    x:Name="HotkeyPlaceholderText" />
 
         <!-- TODO Phase 7: Port ShortcutControl for each hotkey action -->
-        <TextBlock Text="Full Screen Grab" Style="{StaticResource BodyStrongTextBlockStyle}" />
-        <TextBlock x:Name="FsgHotkeyText" Text="Not configured" Style="{StaticResource BodyTextBlockStyle}" Opacity="0.7" />
+        <TextBlock Text="Full Screen Grab" Style="{StaticResource TitleSmall}" />
+        <TextBlock x:Name="FsgHotkeyText" Text="Not configured" Style="{StaticResource BodyMedium}" Opacity="0.7" />
 
-        <TextBlock Text="Grab Frame" Style="{StaticResource BodyStrongTextBlockStyle}" />
-        <TextBlock x:Name="GfHotkeyText" Text="Not configured" Style="{StaticResource BodyTextBlockStyle}" Opacity="0.7" />
+        <TextBlock Text="Grab Frame" Style="{StaticResource TitleSmall}" />
+        <TextBlock x:Name="GfHotkeyText" Text="Not configured" Style="{StaticResource BodyMedium}" Opacity="0.7" />
 
-        <TextBlock Text="Edit Text Window" Style="{StaticResource BodyStrongTextBlockStyle}" />
-        <TextBlock x:Name="EtwHotkeyText" Text="Not configured" Style="{StaticResource BodyTextBlockStyle}" Opacity="0.7" />
+        <TextBlock Text="Edit Text Window" Style="{StaticResource TitleSmall}" />
+        <TextBlock x:Name="EtwHotkeyText" Text="Not configured" Style="{StaticResource BodyMedium}" Opacity="0.7" />
 
-        <TextBlock Text="Quick Simple Lookup" Style="{StaticResource BodyStrongTextBlockStyle}" />
-        <TextBlock x:Name="QslHotkeyText" Text="Not configured" Style="{StaticResource BodyTextBlockStyle}" Opacity="0.7" />
+        <TextBlock Text="Quick Simple Lookup" Style="{StaticResource TitleSmall}" />
+        <TextBlock x:Name="QslHotkeyText" Text="Not configured" Style="{StaticResource BodyMedium}" Opacity="0.7" />
       </StackPanel>
 
       <!-- Non-Windows info -->
       <TextBlock x:Name="PlatformInfoText"
                  TextWrapping="Wrap"
-                 Style="{StaticResource BodyTextBlockStyle}"
+                 Style="{StaticResource BodyMedium}"
                  Opacity="0.7"
                  Margin="0,16,0,0"
                  Visibility="Collapsed">
