@@ -11,7 +11,7 @@ public partial class App : Application
     }
 
     public static Window? MainWindow { get; private set; }
-    protected IHost? Host { get; private set; }
+    public IHost? Host { get; private set; }
 
     [SuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Uno.Extensions APIs are used in a way that is safe for trimming in this template context.")]
     protected async override void OnLaunched(LaunchActivatedEventArgs args)
@@ -53,8 +53,9 @@ public partial class App : Application
                     services.AddSingleton<ILanguageService, LanguageService>();
                     services.AddSingleton<IOcrService, OcrService>();
 
-                    // TODO: Register remaining services as we port them
-                    // services.AddSingleton<IHistoryService, HistoryService>();
+                    services.AddSingleton<IHistoryService, FileHistoryService>();
+                    services.AddSingleton<InAppNotificationService>();
+                    services.AddSingleton<INotificationService>(sp => sp.GetRequiredService<InAppNotificationService>());
                 })
                 .UseNavigation(RegisterRoutes)
             );
@@ -83,13 +84,15 @@ public partial class App : Application
             new ViewMap<LanguageSettingsPage, LanguageSettingsModel>(),
             new ViewMap<KeysSettingsPage, KeysSettingsModel>(),
             new ViewMap<TesseractSettingsPage, TesseractSettingsModel>(),
-            new ViewMap<DangerSettingsPage, DangerSettingsModel>()
+            new ViewMap<DangerSettingsPage, DangerSettingsModel>(),
+            new ViewMap<FirstRunPage, FirstRunModel>()
         );
 
         routes.Register(
             new RouteMap("", View: views.FindByViewModel<ShellModel>(),
                 Nested:
                 [
+                    new("FirstRun", View: views.FindByViewModel<FirstRunModel>()),
                     new("Shell", View: views.FindByView<ShellPage>(),
                         Nested:
                         [

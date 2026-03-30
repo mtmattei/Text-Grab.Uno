@@ -1,0 +1,257 @@
+<Page x:Class="TextGrab.Presentation.FirstRunPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:controls="using:TextGrab.Controls"
+      NavigationCacheMode="Disabled">
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel MaxWidth="800"
+                Padding="50,20"
+                HorizontalAlignment="Center"
+                Spacing="4">
+
+      <!-- Welcome -->
+      <TextBlock Text="Welcome to Text Grab!"
+                 Style="{StaticResource TitleLargeTextBlockStyle}"
+                 HorizontalAlignment="Center"
+                 FontSize="32"
+                 Margin="0,0,0,16" />
+
+      <TextBlock TextWrapping="Wrap"
+                 Style="{StaticResource BodyTextBlockStyle}"
+                 HorizontalAlignment="Center"
+                 MaxWidth="600"
+                 TextAlignment="Center"
+                 Margin="0,0,0,24">
+        Text Grab has four different modes for working with text.
+      </TextBlock>
+
+      <!-- Default Launch Window selection -->
+      <TextBlock Text="Default Launch Window"
+                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 HorizontalAlignment="Center"
+                 Margin="0,8,0,12" />
+
+      <Grid MaxWidth="700" HorizontalAlignment="Center">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Fullscreen -->
+        <RadioButton x:Name="FullScreenRDBTN"
+                     Grid.Row="0" Grid.Column="0"
+                     HorizontalAlignment="Center"
+                     GroupName="DefaultLaunch"
+                     Checked="RadioButton_Checked">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xEA3A;" FontSize="16" />
+            <TextBlock Text="Full Screen" />
+          </StackPanel>
+        </RadioButton>
+        <Border Grid.Row="1" Grid.Column="0"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                CornerRadius="8" Margin="8" Padding="12"
+                MinHeight="80">
+          <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xEA3A;" FontSize="40" Opacity="0.5" />
+        </Border>
+        <HyperlinkButton Grid.Row="2" Grid.Column="0"
+                         HorizontalAlignment="Center"
+                         Content="Try Full Screen"
+                         Click="TryFullscreen_Click" />
+
+        <!-- Grab Frame -->
+        <RadioButton x:Name="GrabFrameRDBTN"
+                     Grid.Row="0" Grid.Column="1"
+                     HorizontalAlignment="Center"
+                     GroupName="DefaultLaunch"
+                     Checked="RadioButton_Checked">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE8B7;" FontSize="16" />
+            <TextBlock Text="Grab Frame" />
+          </StackPanel>
+        </RadioButton>
+        <Border Grid.Row="1" Grid.Column="1"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                CornerRadius="8" Margin="8" Padding="12"
+                MinHeight="80">
+          <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE8B7;" FontSize="40" Opacity="0.5" />
+        </Border>
+        <HyperlinkButton Grid.Row="2" Grid.Column="1"
+                         HorizontalAlignment="Center"
+                         Content="Try Grab Frame"
+                         Click="TryGrabFrame_Click" />
+
+        <!-- Edit Text -->
+        <RadioButton x:Name="EditWindowRDBTN"
+                     Grid.Row="0" Grid.Column="2"
+                     HorizontalAlignment="Center"
+                     GroupName="DefaultLaunch"
+                     Checked="RadioButton_Checked">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <SymbolIcon Symbol="Edit" />
+            <TextBlock Text="Edit Text" />
+          </StackPanel>
+        </RadioButton>
+        <Border Grid.Row="1" Grid.Column="2"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                CornerRadius="8" Margin="8" Padding="12"
+                MinHeight="80">
+          <SymbolIcon Symbol="Edit" RenderTransformOrigin="0.5,0.5">
+            <SymbolIcon.RenderTransform>
+              <ScaleTransform ScaleX="2.5" ScaleY="2.5" />
+            </SymbolIcon.RenderTransform>
+          </SymbolIcon>
+        </Border>
+        <HyperlinkButton Grid.Row="2" Grid.Column="2"
+                         HorizontalAlignment="Center"
+                         Content="Try Edit Text"
+                         Click="TryEditWindow_Click" />
+
+        <!-- Quick Lookup -->
+        <RadioButton x:Name="QuickLookupRDBTN"
+                     Grid.Row="0" Grid.Column="3"
+                     HorizontalAlignment="Center"
+                     GroupName="DefaultLaunch"
+                     Checked="RadioButton_Checked">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <SymbolIcon Symbol="Find" />
+            <TextBlock Text="Quick Lookup" />
+          </StackPanel>
+        </RadioButton>
+        <Border Grid.Row="1" Grid.Column="3"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                CornerRadius="8" Margin="8" Padding="12"
+                MinHeight="80">
+          <SymbolIcon Symbol="Find" RenderTransformOrigin="0.5,0.5">
+            <SymbolIcon.RenderTransform>
+              <ScaleTransform ScaleX="2.5" ScaleY="2.5" />
+            </SymbolIcon.RenderTransform>
+          </SymbolIcon>
+        </Border>
+        <HyperlinkButton Grid.Row="2" Grid.Column="3"
+                         HorizontalAlignment="Center"
+                         Content="Try Quick Lookup"
+                         Click="TryQuickLookup_Click" />
+      </Grid>
+
+      <!-- How Full-Screen works -->
+      <TextBlock Text="How Full-Screen works"
+                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 HorizontalAlignment="Center"
+                 Margin="0,32,0,8" />
+      <TextBlock TextWrapping="Wrap" MaxWidth="600" HorizontalAlignment="Center"
+                 Style="{StaticResource BodyTextBlockStyle}">
+        Like a screenshot tool but instead of a photo you get the text within the selection. Draw a rectangle around the text you wish to copy, or click on a single word. Both methods use the built-in OCR engine. When text is recognized it gets put in your clipboard. Paste using Ctrl+V into any program.
+      </TextBlock>
+
+      <!-- How Grab Frame works -->
+      <TextBlock Text="How Grab Frame works"
+                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 HorizontalAlignment="Center"
+                 Margin="0,24,0,8" />
+      <TextBlock TextWrapping="Wrap" MaxWidth="600" HorizontalAlignment="Center"
+                 Style="{StaticResource BodyTextBlockStyle}">
+        The Grab Frame is a window which can be moved or resized. It stays on top and reads all text within the border. Click or drag to select Word Borders, then add them to the clipboard by clicking "Grab". Drop an image onto the Grab Frame to view and copy text. Edit each line to correct errors. Table mode draws a grid for easy pasting into tables.
+      </TextBlock>
+
+      <!-- Edit Text Window -->
+      <TextBlock Text="What the Edit Text Window can do"
+                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 HorizontalAlignment="Center"
+                 Margin="0,24,0,8" />
+      <TextBlock TextWrapping="Wrap" MaxWidth="600" HorizontalAlignment="Center"
+                 Style="{StaticResource BodyTextBlockStyle}">
+        Similar to Notepad, the Edit Text Window is a "Pure Text" editing experience with no formatting. Several tools make it quick and easy to fix or change text: make text into a single line, toggle case, trim spaces, isolate selected text, replace reserved characters, find and replace, extract regular expressions, and more.
+      </TextBlock>
+
+      <!-- Quick Simple Lookup -->
+      <TextBlock Text="Where does Quick Simple Lookup fit in?"
+                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 HorizontalAlignment="Center"
+                 Margin="0,24,0,8" />
+      <TextBlock TextWrapping="Wrap" MaxWidth="600" HorizontalAlignment="Center"
+                 Style="{StaticResource BodyTextBlockStyle}">
+        Unlike Full-Screen or Grab Frame, Quick Simple Lookup does not use OCR. It's fast to launch and load the lookup table. Search for any item to filter results quickly. Press Enter to copy the lookup value and close the window in a snap, then paste into the app you need.
+      </TextBlock>
+
+      <!-- Application Options -->
+      <TextBlock Text="Application Options"
+                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 HorizontalAlignment="Center"
+                 Margin="0,32,0,8" />
+
+      <TextBlock TextWrapping="Wrap" MaxWidth="600" HorizontalAlignment="Center"
+                 Style="{StaticResource BodyTextBlockStyle}">
+        Clicking on notifications puts the copied text into an Edit Text Window to be copied, corrected, changed, or amended.
+      </TextBlock>
+      <ToggleSwitch x:Name="NotificationsToggle"
+                    HorizontalAlignment="Center"
+                    Toggled="NotificationsToggle_Toggled"
+                    Header="Enable Notifications"
+                    Margin="0,8,0,0" />
+
+      <TextBlock TextWrapping="Wrap" MaxWidth="600" HorizontalAlignment="Center"
+                 Style="{StaticResource BodyTextBlockStyle}"
+                 Margin="0,8,0,0">
+        Running in the background enables shortcut keys and faster launch times.
+      </TextBlock>
+      <ToggleSwitch x:Name="BackgroundToggle"
+                    HorizontalAlignment="Center"
+                    Toggled="BackgroundToggle_Toggled"
+                    Header="Run Text Grab in the background" />
+
+      <TextBlock TextWrapping="Wrap" MaxWidth="600" HorizontalAlignment="Center"
+                 Style="{StaticResource BodyTextBlockStyle}"
+                 Margin="0,8,0,0">
+        Launching Text Grab on startup keeps the app ready for quick access.
+      </TextBlock>
+      <ToggleSwitch x:Name="StartupToggle"
+                    HorizontalAlignment="Center"
+                    Toggled="StartupToggle_Toggled"
+                    Header="Start Text Grab on startup"
+                    Visibility="Collapsed" />
+
+      <!-- How Text Grab is Different -->
+      <TextBlock Text="How Text Grab is Different"
+                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 HorizontalAlignment="Center"
+                 Margin="0,24,0,8" />
+      <TextBlock TextWrapping="Wrap" MaxWidth="600" HorizontalAlignment="Center"
+                 Style="{StaticResource BodyTextBlockStyle}">
+        Text Grab was designed with speed, efficiency, and privacy in mind. By using the built-in OCR engine, Text Grab respects users' privacy and does not transmit data regarding the copied text. I hope you find Text Grab as useful as I do.
+      </TextBlock>
+      <HyperlinkButton HorizontalAlignment="Center"
+                       NavigateUri="https://github.com/TheJoeFin/Text-Grab/"
+                       Content="GitHub.com/TheJoeFin/Text-Grab/" />
+      <HyperlinkButton HorizontalAlignment="Center"
+                       NavigateUri="mailto:support@textgrab.net"
+                       Content="support@TextGrab.net" />
+
+      <!-- Action buttons -->
+      <StackPanel Orientation="Horizontal"
+                  HorizontalAlignment="Right"
+                  Spacing="12"
+                  Margin="0,24,0,40">
+        <controls:CollapsibleButton x:Name="SettingsButton"
+                                    ButtonText="Settings"
+                                    ButtonGlyph="&#xE713;"
+                                    CanChangeStyle="False"
+                                    Click="SettingsButton_Click" />
+        <controls:CollapsibleButton x:Name="OkayButton"
+                                    ButtonText="Okay"
+                                    ButtonGlyph="&#xE73E;"
+                                    CanChangeStyle="False"
+                                    Click="OkayButton_Click" />
+      </StackPanel>
+
+    </StackPanel>
+  </ScrollViewer>
+</Page>

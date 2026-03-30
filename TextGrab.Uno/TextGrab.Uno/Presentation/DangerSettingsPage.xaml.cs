@@ -94,8 +94,11 @@ public sealed partial class DangerSettingsPage : Page
         var result = await dialog.ShowAsync();
         if (result == ContentDialogResult.Primary)
         {
-            // TODO Phase 7: Wire to IHistoryService.DeleteHistory()
-            await ShowStatusAsync("History cleared.");
+            if (GetModel() is { } model)
+            {
+                await model.ClearHistory();
+                await ShowStatusAsync("History cleared.");
+            }
         }
     }
 

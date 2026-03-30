@@ -88,7 +88,24 @@ public sealed partial class GeneralSettingsPage : Page
     {
         if (_isLoading || GetModel() is not { } model) return;
         if (ThemeRadioButtons.SelectedItem is RadioButton rb && rb.Tag is string theme)
+        {
             _ = model.SetTheme(theme);
+            ApplyTheme(theme);
+        }
+    }
+
+    private void ApplyTheme(string theme)
+    {
+        if (this.XamlRoot is null) return;
+
+        var elementTheme = theme switch
+        {
+            "Light" => ElementTheme.Light,
+            "Dark" => ElementTheme.Dark,
+            _ => ElementTheme.Default,
+        };
+
+        global::Uno.Toolkit.UI.SystemThemeHelper.SetApplicationTheme(this.XamlRoot, elementTheme);
     }
 
     private void DefaultLaunchRadioButtons_SelectionChanged(object sender, SelectionChangedEventArgs e)

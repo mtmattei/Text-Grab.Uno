@@ -11,6 +11,7 @@ public interface IHistoryService
     IReadOnlyList<HistoryInfo> GetImageHistory();
     Task SaveTextHistoryAsync(HistoryInfo item, CancellationToken ct = default);
     Task RemoveHistoryItemAsync(HistoryInfo item, CancellationToken ct = default);
+    Task DeleteAllHistoryAsync(CancellationToken ct = default);
 }
 
 public partial record HistoryInfo(

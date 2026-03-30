@@ -5,48 +5,57 @@
       xmlns:uen="using:Uno.Extensions.Navigation.UI"
       Background="{ThemeResource BackgroundBrush}">
 
-  <NavigationView x:Name="NavView"
-                  uen:Region.Attached="true"
-                  PaneDisplayMode="LeftCompact"
-                  IsBackButtonVisible="Collapsed"
-                  IsSettingsVisible="False">
+  <Grid>
+    <NavigationView x:Name="NavView"
+                    uen:Region.Attached="true"
+                    PaneDisplayMode="LeftCompact"
+                    IsBackButtonVisible="Collapsed"
+                    IsSettingsVisible="False">
 
-    <NavigationView.MenuItems>
-      <NavigationViewItem uen:Region.Name="EditText"
-                          Content="Edit Text">
-        <NavigationViewItem.Icon>
-          <SymbolIcon Symbol="Edit" />
-        </NavigationViewItem.Icon>
-      </NavigationViewItem>
-      <NavigationViewItem uen:Region.Name="GrabFrame"
-                          Content="Grab Frame">
-        <NavigationViewItem.Icon>
-          <FontIcon Glyph="&#xE8B7;" />
-        </NavigationViewItem.Icon>
-      </NavigationViewItem>
-      <NavigationViewItem uen:Region.Name="QuickLookup"
-                          Content="Quick Lookup">
-        <NavigationViewItem.Icon>
-          <SymbolIcon Symbol="Find" />
-        </NavigationViewItem.Icon>
-      </NavigationViewItem>
-    </NavigationView.MenuItems>
+      <NavigationView.MenuItems>
+        <NavigationViewItem uen:Region.Name="EditText"
+                            Content="Edit Text">
+          <NavigationViewItem.Icon>
+            <SymbolIcon Symbol="Edit" />
+          </NavigationViewItem.Icon>
+        </NavigationViewItem>
+        <NavigationViewItem uen:Region.Name="GrabFrame"
+                            Content="Grab Frame">
+          <NavigationViewItem.Icon>
+            <FontIcon Glyph="&#xE8B7;" />
+          </NavigationViewItem.Icon>
+        </NavigationViewItem>
+        <NavigationViewItem uen:Region.Name="QuickLookup"
+                            Content="Quick Lookup">
+          <NavigationViewItem.Icon>
+            <SymbolIcon Symbol="Find" />
+          </NavigationViewItem.Icon>
+        </NavigationViewItem>
+      </NavigationView.MenuItems>
 
-    <NavigationView.FooterMenuItems>
-      <NavigationViewItem uen:Region.Name="Settings"
-                          Content="Settings">
-        <NavigationViewItem.Icon>
-          <SymbolIcon Symbol="Setting" />
-        </NavigationViewItem.Icon>
-      </NavigationViewItem>
-    </NavigationView.FooterMenuItems>
+      <NavigationView.FooterMenuItems>
+        <NavigationViewItem uen:Region.Name="Settings"
+                            Content="Settings">
+          <NavigationViewItem.Icon>
+            <SymbolIcon Symbol="Setting" />
+          </NavigationViewItem.Icon>
+        </NavigationViewItem>
+      </NavigationView.FooterMenuItems>
 
-    <Grid uen:Region.Attached="true" uen:Region.Navigator="Visibility">
-      <Grid uen:Region.Name="EditText" />
-      <Grid uen:Region.Name="GrabFrame" />
-      <Grid uen:Region.Name="QuickLookup" />
-      <Grid uen:Region.Name="Settings" />
-    </Grid>
+      <Grid uen:Region.Attached="true" uen:Region.Navigator="Visibility">
+        <Grid uen:Region.Name="EditText" />
+        <Grid uen:Region.Name="GrabFrame" />
+        <Grid uen:Region.Name="QuickLookup" />
+        <Grid uen:Region.Name="Settings" />
+      </Grid>
 
-  </NavigationView>
+    </NavigationView>
+
+    <!-- Notification overlay -->
+    <StackPanel x:Name="NotificationHost"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Center"
+                Margin="0,48,0,0"
+                IsHitTestVisible="False" />
+  </Grid>
 </Page>
