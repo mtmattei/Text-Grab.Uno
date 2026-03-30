@@ -1,0 +1,39 @@
+<UserControl
+    x:Class="TextGrab.Controls.CollapsibleButton"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Name="CollapsibleButtonControl">
+
+  <Button x:Name="InnerButton"
+          Height="36"
+          MaxWidth="300"
+          Margin="4,8"
+          HorizontalAlignment="Left"
+          Click="InnerButton_Click">
+    <Button.ContextFlyout>
+      <MenuFlyout>
+        <MenuFlyoutItem x:Name="ChangeStyleItem"
+                        Text="Change Style"
+                        Click="ChangeStyleItem_Click" />
+      </MenuFlyout>
+    </Button.ContextFlyout>
+    <Grid MinWidth="18"
+          Margin="8,0"
+          HorizontalAlignment="Center"
+          VerticalAlignment="Center">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+      <FontIcon x:Name="ButtonIcon"
+                FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                FontSize="16"
+                Glyph="{x:Bind ButtonGlyph, Mode=OneWay}" />
+      <TextBlock x:Name="ButtonTextBlock"
+                 Grid.Column="1"
+                 Margin="8,0,0,0"
+                 VerticalAlignment="Center"
+                 Text="{x:Bind ButtonText, Mode=OneWay}" />
+    </Grid>
+  </Button>
+</UserControl>

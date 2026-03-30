@@ -1,0 +1,145 @@
+<Page x:Class="TextGrab.Presentation.GeneralSettingsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      NavigationCacheMode="Required">
+
+  <ScrollViewer>
+    <StackPanel Spacing="4" Padding="20,12,40,40">
+
+      <!-- Header + Version -->
+      <TextBlock Text="General Settings"
+                 Style="{StaticResource TitleLargeTextBlockStyle}" />
+      <TextBlock x:Name="VersionTextBlock"
+                 Text="Version 5.0.0"
+                 Style="{StaticResource BodyTextBlockStyle}"
+                 Opacity="0.7"
+                 Margin="0,0,0,8" />
+
+      <!-- Welcome card -->
+      <Border Padding="20,12,20,20"
+              Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+              CornerRadius="8"
+              Margin="0,0,0,16">
+        <StackPanel Spacing="8">
+          <TextBlock Text="Hello there!"
+                     Style="{StaticResource TitleMediumTextBlockStyle}" />
+          <TextBlock TextWrapping="Wrap" Style="{StaticResource BodyTextBlockStyle}">
+            Thank you for using Text Grab! Building this application is very much a labor of love.
+            Feel free to open an issue on GitHub if you have a bug or feature request.
+            Happy Text Grabbing!
+          </TextBlock>
+          <TextBlock Text="- Joe"
+                     Style="{StaticResource BodyTextBlockStyle}"
+                     Margin="0,4,0,0" />
+          <HyperlinkButton NavigateUri="https://github.com/TheJoeFin/Text-Grab/issues"
+                           Content="https://github.com/TheJoeFin/Text-Grab/issues" />
+          <HyperlinkButton NavigateUri="mailto:joe@JoeFinApps.com"
+                           Content="joe@JoeFinApps.com" />
+        </StackPanel>
+      </Border>
+
+      <!-- Theme -->
+      <TextBlock Text="Text Grab Theme"
+                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Margin="0,16,0,4" />
+      <RadioButtons x:Name="ThemeRadioButtons"
+                    SelectionChanged="ThemeRadioButtons_SelectionChanged">
+        <RadioButton Content="System" Tag="System" />
+        <RadioButton Content="Light" Tag="Light" />
+        <RadioButton Content="Dark" Tag="Dark" />
+      </RadioButtons>
+
+      <!-- Show Notification -->
+      <TextBlock Text="Show Notification"
+                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Margin="0,16,0,4" />
+      <ToggleSwitch x:Name="ShowToastToggle"
+                    Toggled="ShowToastToggle_Toggled"
+                    Header="Show notification when text is copied" />
+
+      <!-- Default Launch Window -->
+      <TextBlock Text="Default Launch Window"
+                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Margin="0,16,0,4" />
+      <RadioButtons x:Name="DefaultLaunchRadioButtons"
+                    SelectionChanged="DefaultLaunchRadioButtons_SelectionChanged">
+        <RadioButton Content="Full Screen" Tag="Fullscreen" />
+        <RadioButton Content="Grab Frame" Tag="GrabFrame" />
+        <RadioButton Content="Edit Text Window" Tag="EditText" />
+        <RadioButton Content="Quick Simple Lookup" Tag="QuickLookup" />
+      </RadioButtons>
+
+      <!-- Run in the background -->
+      <TextBlock Text="Run in the background"
+                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Margin="0,16,0,4" />
+      <ToggleSwitch x:Name="RunInBackgroundToggle"
+                    Toggled="RunInBackgroundToggle_Toggled"
+                    Header="Run Text Grab in the background and enable hotkeys" />
+
+      <!-- Startup on login (Windows only — hidden on other platforms) -->
+      <ToggleSwitch x:Name="StartupOnLoginToggle"
+                    Toggled="StartupOnLoginToggle_Toggled"
+                    Header="Auto start Text Grab when you login"
+                    Margin="0,8,0,0"
+                    Visibility="Collapsed" />
+
+      <!-- Barcodes -->
+      <TextBlock Text="Read barcodes and QR Codes"
+                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Margin="0,16,0,4" />
+      <ToggleSwitch x:Name="ReadBarcodesToggle"
+                    Toggled="ReadBarcodesToggle_Toggled"
+                    Header="Try to read barcodes" />
+      <TextBlock Text="Disabling may speed up results"
+                 Style="{StaticResource BodyTextBlockStyle}"
+                 Opacity="0.7" />
+
+      <!-- Web Search -->
+      <TextBlock Text="Web Search Options"
+                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Margin="0,16,0,4" />
+      <ComboBox x:Name="WebSearchComboBox"
+                Width="300"
+                HorizontalAlignment="Left"
+                SelectionChanged="WebSearchComboBox_SelectionChanged">
+        <ComboBoxItem Content="Google" Tag="https://www.google.com/search?q=" />
+        <ComboBoxItem Content="Bing" Tag="https://www.bing.com/search?q=" />
+        <ComboBoxItem Content="DuckDuckGo" Tag="https://duckduckgo.com/?q=" />
+      </ComboBox>
+
+      <!-- Correct Common Errors -->
+      <TextBlock Text="Correct Common Errors"
+                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Margin="0,16,0,4" />
+      <ToggleSwitch x:Name="ErrorCorrectToggle"
+                    Toggled="ErrorCorrectToggle_Toggled"
+                    Header="Correct common confusions between numbers and letters" />
+      <ToggleSwitch x:Name="CorrectToLatinToggle"
+                    Toggled="CorrectToLatinToggle_Toggled"
+                    Header="Correct Greek and Cyrillic to Latin letters"
+                    Margin="0,8,0,0" />
+
+      <!-- Clipboard Options -->
+      <TextBlock Text="Clipboard Options"
+                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Margin="0,16,0,4" />
+      <ToggleSwitch x:Name="NeverClipboardToggle"
+                    Toggled="NeverClipboardToggle_Toggled"
+                    Header="Never automatically add text to the clipboard" />
+      <ToggleSwitch x:Name="TryInsertToggle"
+                    Toggled="TryInsertToggle_Toggled"
+                    Header="Try to insert text after Fullscreen Grab"
+                    Margin="0,8,0,0" />
+
+      <!-- History -->
+      <TextBlock Text="History"
+                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Margin="0,16,0,4" />
+      <ToggleSwitch x:Name="HistoryToggle"
+                    Toggled="HistoryToggle_Toggled"
+                    Header="Keep recent history of Grabs and Edit Text Windows" />
+
+    </StackPanel>
+  </ScrollViewer>
+</Page>

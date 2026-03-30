@@ -1,0 +1,84 @@
+<Page x:Class="TextGrab.Presentation.DangerSettingsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:controls="using:TextGrab.Controls"
+      NavigationCacheMode="Required">
+
+  <ScrollViewer>
+    <StackPanel Spacing="4" Padding="20,12,40,40">
+
+      <TextBlock Text="Dangerous Options"
+                 Style="{StaticResource TitleLargeTextBlockStyle}" />
+
+      <!-- Shutdown -->
+      <TextBlock Text="Shutdown Text Grab."
+                 Style="{StaticResource BodyTextBlockStyle}"
+                 Margin="0,12,0,0" />
+      <controls:CollapsibleButton x:Name="ShutdownButton"
+                                  ButtonText="Shutdown Text Grab"
+                                  ButtonGlyph="&#xE7E8;"
+                                  Click="ShutdownButton_Click" />
+
+      <!-- Export Bug Report -->
+      <TextBlock Text="Generate bug report with app diagnostic information."
+                 Style="{StaticResource BodyTextBlockStyle}"
+                 Margin="0,12,0,0" />
+      <controls:CollapsibleButton x:Name="ExportBugReportButton"
+                                  ButtonText="Export Bug Report"
+                                  ButtonGlyph="&#xEBE8;"
+                                  Click="ExportBugReportButton_Click" />
+
+      <!-- Export Settings -->
+      <TextBlock Text="Export all settings to a file."
+                 Style="{StaticResource BodyTextBlockStyle}"
+                 Margin="0,12,0,0" />
+      <controls:CollapsibleButton x:Name="ExportSettingsButton"
+                                  ButtonText="Export Settings"
+                                  ButtonGlyph="&#xED43;"
+                                  Click="ExportSettingsButton_Click" />
+
+      <!-- Import Settings -->
+      <TextBlock Text="Import settings from a previously exported file."
+                 Style="{StaticResource BodyTextBlockStyle}"
+                 Margin="0,12,0,0" />
+      <controls:CollapsibleButton x:Name="ImportSettingsButton"
+                                  ButtonText="Import Settings"
+                                  ButtonGlyph="&#xE8B5;"
+                                  Click="ImportSettingsButton_Click" />
+
+      <!-- AI Arch Override -->
+      <TextBlock Text="Check CPU Architecture before enabling Windows Local AI model features."
+                 Style="{StaticResource BodyTextBlockStyle}"
+                 Margin="0,12,0,0" />
+      <ToggleSwitch x:Name="OverrideArchToggle"
+                    Toggled="OverrideArchToggle_Toggled"
+                    OnContent="No CPU Arch is checked"
+                    OffContent="ARM CPU only" />
+
+      <!-- Reset All Settings -->
+      <TextBlock Text="Reset all settings to default settings."
+                 Style="{StaticResource BodyTextBlockStyle}"
+                 Margin="0,12,0,0" />
+      <controls:CollapsibleButton x:Name="ResetSettingsButton"
+                                  ButtonText="Reset All Settings"
+                                  ButtonGlyph="&#xE72C;"
+                                  Click="ResetSettingsButton_Click" />
+
+      <!-- Clear History -->
+      <TextBlock Text="Delete all history items."
+                 Style="{StaticResource BodyTextBlockStyle}"
+                 Margin="0,12,0,0" />
+      <controls:CollapsibleButton x:Name="ClearHistoryButton"
+                                  ButtonText="Clear History"
+                                  ButtonGlyph="&#xE74D;"
+                                  Click="ClearHistoryButton_Click" />
+
+      <!-- Status -->
+      <TextBlock x:Name="StatusText"
+                 Style="{StaticResource BodyTextBlockStyle}"
+                 Margin="0,16,0,0"
+                 Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+
+    </StackPanel>
+  </ScrollViewer>
+</Page>

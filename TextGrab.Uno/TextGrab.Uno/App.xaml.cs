@@ -77,7 +77,13 @@ public partial class App : Application
             new ViewMap<EditTextPage, EditTextModel>(),
             new ViewMap<GrabFramePage, GrabFrameModel>(),
             new ViewMap<QuickLookupPage, QuickLookupModel>(),
-            new ViewMap<SettingsPage, SettingsModel>()
+            new ViewMap<SettingsPage, SettingsModel>(),
+            new ViewMap<GeneralSettingsPage, GeneralSettingsModel>(),
+            new ViewMap<FullscreenGrabSettingsPage, FullscreenGrabSettingsModel>(),
+            new ViewMap<LanguageSettingsPage, LanguageSettingsModel>(),
+            new ViewMap<KeysSettingsPage, KeysSettingsModel>(),
+            new ViewMap<TesseractSettingsPage, TesseractSettingsModel>(),
+            new ViewMap<DangerSettingsPage, DangerSettingsModel>()
         );
 
         routes.Register(
@@ -90,7 +96,16 @@ public partial class App : Application
                             new("EditText", View: views.FindByViewModel<EditTextModel>(), IsDefault: true),
                             new("GrabFrame", View: views.FindByViewModel<GrabFrameModel>()),
                             new("QuickLookup", View: views.FindByViewModel<QuickLookupModel>()),
-                            new("Settings", View: views.FindByViewModel<SettingsModel>()),
+                            new("Settings", View: views.FindByViewModel<SettingsModel>(),
+                                Nested:
+                                [
+                                    new("GeneralSettings", View: views.FindByViewModel<GeneralSettingsModel>(), IsDefault: true),
+                                    new("FullscreenGrabSettings", View: views.FindByViewModel<FullscreenGrabSettingsModel>()),
+                                    new("LanguageSettings", View: views.FindByViewModel<LanguageSettingsModel>()),
+                                    new("KeysSettings", View: views.FindByViewModel<KeysSettingsModel>()),
+                                    new("TesseractSettings", View: views.FindByViewModel<TesseractSettingsModel>()),
+                                    new("DangerSettings", View: views.FindByViewModel<DangerSettingsModel>()),
+                                ]),
                         ]),
                 ])
         );

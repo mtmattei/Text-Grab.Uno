@@ -54,6 +54,15 @@ public record AppSettings
     public string LookupFileLocation { get; init; } = "";
     public bool LookupSearchHistory { get; init; } = false;
 
+    // History
+    public bool UseHistory { get; init; } = true;
+
+    // Hotkeys (Windows-only)
+    public bool GlobalHotkeysEnabled { get; init; } = false;
+
+    // Danger
+    public bool OverrideAiArchCheck { get; init; } = false;
+
     // Other
     public string WebSearchUrl { get; init; } = "https://www.google.com/search?q=";
     public string CustomBottomBarItems { get; init; } = "";

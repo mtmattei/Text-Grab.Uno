@@ -1,0 +1,74 @@
+<Page x:Class="TextGrab.Presentation.LanguageSettingsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      NavigationCacheMode="Required">
+
+  <ScrollViewer>
+    <StackPanel Spacing="4" Padding="20,12,40,40">
+
+      <TextBlock Text="Language Settings"
+                 Style="{StaticResource TitleLargeTextBlockStyle}" />
+
+      <!-- Windows AI OCR section -->
+      <TextBlock Text="Windows AI OCR"
+                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Margin="0,16,0,4" />
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <TextBlock x:Name="StatusTextBlock"
+                   FontWeight="Bold"
+                   Style="{StaticResource BodyTextBlockStyle}" />
+        <TextBlock x:Name="ReasonTextBlock"
+                   FontStyle="Italic"
+                   Style="{StaticResource BodyTextBlockStyle}"
+                   TextWrapping="Wrap" />
+      </StackPanel>
+      <TextBlock TextWrapping="Wrap"
+                 Style="{StaticResource BodyTextBlockStyle}"
+                 Margin="0,8,0,0">
+        Windows AI OCR is a state-of-the-art OCR engine on Copilot+ PCs. It supports a wide range of styles and languages with high accuracy.
+      </TextBlock>
+      <HyperlinkButton NavigateUri="https://learn.microsoft.com/en-us/windows/ai/apis/"
+                       Content="Learn more about Windows AI Foundry" />
+
+      <!-- Windows Installed Languages -->
+      <TextBlock Text="Windows Installed Languages"
+                 Style="{StaticResource TitleMediumTextBlockStyle}"
+                 Margin="0,24,0,4" />
+      <HyperlinkButton NavigateUri="https://learn.microsoft.com/en-us/windows/powertoys/text-extractor#how-to-query-for-ocr-language-packs"
+                       Content="How to install OCR languages with PowerShell" />
+      <ListView x:Name="WindowsLanguagesListView"
+                MaxWidth="600"
+                MaxHeight="200"
+                HorizontalAlignment="Left"
+                SelectionMode="None" />
+
+      <!-- Tesseract Languages (shown only if Tesseract enabled) -->
+      <StackPanel x:Name="TesseractLanguagesPanel" Visibility="Collapsed">
+        <TextBlock Text="Tesseract Languages"
+                   Style="{StaticResource TitleMediumTextBlockStyle}"
+                   Margin="0,24,0,4" />
+        <ListView x:Name="TesseractLanguagesListView"
+                  MaxWidth="600"
+                  MaxHeight="200"
+                  HorizontalAlignment="Left"
+                  SelectionMode="None" />
+        <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,8,0,0">
+          Download and install languages from Tesseract GitHub
+        </TextBlock>
+        <HyperlinkButton NavigateUri="https://github.com/tesseract-ocr/tessdata"
+                         Content="https://github.com/tesseract-ocr/tessdata" />
+      </StackPanel>
+
+      <!-- Non-Windows info -->
+      <TextBlock x:Name="PlatformInfoText"
+                 TextWrapping="Wrap"
+                 Style="{StaticResource BodyTextBlockStyle}"
+                 Opacity="0.7"
+                 Margin="0,16,0,0"
+                 Visibility="Collapsed">
+        Language and OCR engine management is available on Windows Desktop only.
+      </TextBlock>
+
+    </StackPanel>
+  </ScrollViewer>
+</Page>

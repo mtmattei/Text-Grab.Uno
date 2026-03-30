@@ -1,0 +1,66 @@
+<Page x:Class="TextGrab.Presentation.KeysSettingsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      NavigationCacheMode="Required">
+
+  <ScrollViewer>
+    <StackPanel Spacing="4" Padding="20,12,40,40">
+
+      <TextBlock Text="Shortcut Key Settings"
+                 Style="{StaticResource TitleLargeTextBlockStyle}" />
+
+      <!-- Run in background -->
+      <ToggleSwitch x:Name="RunInBackgroundToggle"
+                    Toggled="RunInBackgroundToggle_Toggled"
+                    Header="Run Text Grab in the background and enable hotkeys"
+                    Margin="0,12,0,0" />
+      <TextBlock Text="For this setting to take effect, close all instances of Text Grab."
+                 Style="{StaticResource BodyTextBlockStyle}"
+                 FontStyle="Italic"
+                 Opacity="0.7"
+                 Margin="24,0,0,8" />
+
+      <!-- Global hotkeys -->
+      <ToggleSwitch x:Name="GlobalHotkeysToggle"
+                    Toggled="GlobalHotkeysToggle_Toggled"
+                    Header="Global hotkeys"
+                    Margin="0,8,0,0" />
+
+      <!-- Hotkey list (Windows only — placeholder for ShortcutControl) -->
+      <StackPanel x:Name="ShortcutsPanel"
+                  Margin="24,12,20,0"
+                  Spacing="8"
+                  Visibility="Collapsed">
+
+        <TextBlock Text="Hotkey configuration requires the Windows Desktop version."
+                   Style="{StaticResource BodyTextBlockStyle}"
+                   Opacity="0.7"
+                   x:Name="HotkeyPlaceholderText" />
+
+        <!-- TODO Phase 7: Port ShortcutControl for each hotkey action -->
+        <TextBlock Text="Full Screen Grab" Style="{StaticResource BodyStrongTextBlockStyle}" />
+        <TextBlock x:Name="FsgHotkeyText" Text="Not configured" Style="{StaticResource BodyTextBlockStyle}" Opacity="0.7" />
+
+        <TextBlock Text="Grab Frame" Style="{StaticResource BodyStrongTextBlockStyle}" />
+        <TextBlock x:Name="GfHotkeyText" Text="Not configured" Style="{StaticResource BodyTextBlockStyle}" Opacity="0.7" />
+
+        <TextBlock Text="Edit Text Window" Style="{StaticResource BodyStrongTextBlockStyle}" />
+        <TextBlock x:Name="EtwHotkeyText" Text="Not configured" Style="{StaticResource BodyTextBlockStyle}" Opacity="0.7" />
+
+        <TextBlock Text="Quick Simple Lookup" Style="{StaticResource BodyStrongTextBlockStyle}" />
+        <TextBlock x:Name="QslHotkeyText" Text="Not configured" Style="{StaticResource BodyTextBlockStyle}" Opacity="0.7" />
+      </StackPanel>
+
+      <!-- Non-Windows info -->
+      <TextBlock x:Name="PlatformInfoText"
+                 TextWrapping="Wrap"
+                 Style="{StaticResource BodyTextBlockStyle}"
+                 Opacity="0.7"
+                 Margin="0,16,0,0"
+                 Visibility="Collapsed">
+        Global keyboard shortcuts are available on Windows Desktop only.
+      </TextBlock>
+
+    </StackPanel>
+  </ScrollViewer>
+</Page>
