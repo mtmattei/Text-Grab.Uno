@@ -63,6 +63,9 @@ public record AppSettings
     // Danger
     public bool OverrideAiArchCheck { get; init; } = false;
 
+    // Regex
+    public string RegexList { get; init; } = "";
+
     // Other
     public string WebSearchUrl { get; init; } = "https://www.google.com/search?q=";
     public string CustomBottomBarItems { get; init; } = "";
