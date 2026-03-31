@@ -51,6 +51,9 @@
         <Button Content="&#xE8C8;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
                 ToolTipService.ToolTip="Copy Selected (Enter)"
                 Click="CopySelected_Click" />
+        <Button Content="&#xE710;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                ToolTipService.ToolTip="Add New Row"
+                Click="AddRow_Click" />
       </StackPanel>
     </Grid>
 

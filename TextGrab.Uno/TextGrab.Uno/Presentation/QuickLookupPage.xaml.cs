@@ -226,6 +226,15 @@ public sealed partial class QuickLookupPage : Page
         }
     }
 
+    private void AddRow_Click(object sender, RoutedEventArgs e)
+    {
+        var newItem = new LookupItem { ShortValue = "New Key", LongValue = "New Value" };
+        _masterItems.Add(newItem);
+        ApplySearch();
+        SaveButton.Visibility = Visibility.Visible;
+        StatusBarText.Text = "Row added";
+    }
+
     // --- Keyboard ---
 
     private void Page_KeyDown(object sender, KeyRoutedEventArgs e)

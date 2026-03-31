@@ -311,12 +311,104 @@ public sealed partial class EditTextPage : Page
         PassedTextControl.TextWrapping = isChecked ? TextWrapping.Wrap : TextWrapping.NoWrap;
     }
 
-    // --- Navigation / stubs ---
+    private void DeleteAllSelectionPattern_Click(object sender, RoutedEventArgs e)
+    {
+        if (PassedTextControl.SelectionLength == 0) return;
+        string selection = PassedTextControl.SelectedText;
+        // Remove all lines containing the selection pattern
+        var lines = PassedTextControl.Text.Split('\n');
+        var filtered = lines.Where(l => !l.Contains(selection));
+        PassedTextControl.Text = string.Join('\n', filtered);
+    }
+
+    private async void AddRemoveAt_Click(object sender, RoutedEventArgs e)
+    {
+        // Simple add/remove dialog using ContentDialog
+        var inputBox = new TextBox { PlaceholderText = "Text to add/remove" };
+        var posBox = new TextBox { PlaceholderText = "Position (0 = start, -1 = end)" };
+        var panel = new StackPanel { Spacing = 8 };
+        panel.Children.Add(new TextBlock { Text = "Add text at position on every line:" });
+        panel.Children.Add(inputBox);
+        panel.Children.Add(posBox);
+
+        var dialog = new ContentDialog
+        {
+            Title = "Add or Remove at Position",
+            Content = panel,
+            PrimaryButtonText = "Add",
+            SecondaryButtonText = "Remove",
+            CloseButtonText = "Cancel",
+            XamlRoot = this.XamlRoot,
+        };
+
+        var result = await dialog.ShowAsync();
+        if (result == ContentDialogResult.None || string.IsNullOrEmpty(inputBox.Text)) return;
+
+        int.TryParse(posBox.Text, out int position);
+        var lines = PassedTextControl.Text.Split('\n');
+
+        for (int i = 0; i < lines.Length; i++)
+        {
+            string line = lines[i].TrimEnd('\r');
+            if (result == ContentDialogResult.Primary) // Add
+            {
+                int insertAt = position < 0 ? line.Length : Math.Min(position, line.Length);
+                lines[i] = line.Insert(insertAt, inputBox.Text);
+            }
+            else // Remove
+            {
+                lines[i] = line.Replace(inputBox.Text, "");
+            }
+        }
+
+        PassedTextControl.Text = string.Join('\n', lines);
+    }
+
+    private async void RegexManager_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Dialogs.RegexManagerDialog { XamlRoot = this.XamlRoot };
+        var result = await dialog.ShowAsync();
+
+        if (result == ContentDialogResult.Primary && dialog.SelectedPattern is not null)
+        {
+            // Open Find & Replace with the selected pattern
+            var findDialog = new FindReplaceDialog(PassedTextControl);
+            findDialog.XamlRoot = this.XamlRoot;
+            // TODO: Pre-fill with dialog.SelectedPattern.Pattern and enable regex mode
+            await findDialog.ShowAsync();
+        }
+    }
+
+    private async void WebSearch_Click(object sender, RoutedEventArgs e)
+    {
+        string selected = PassedTextControl.SelectionLength > 0
+            ? PassedTextControl.SelectedText
+            : "";
+        if (string.IsNullOrWhiteSpace(selected)) return;
+
+        var settings = ((App)Application.Current).Host?.Services.GetService<IOptions<AppSettings>>();
+        string url = settings?.Value?.WebSearchUrl ?? "https://www.google.com/search?q=";
+        await Windows.System.Launcher.LaunchUriAsync(new Uri(url + Uri.EscapeDataString(selected)));
+    }
+
+    // --- Navigation ---
 
     private async void Settings_Click(object sender, RoutedEventArgs e)
     {
         if (Navigator is { } nav)
             await nav.NavigateViewModelAsync<SettingsModel>(this);
+    }
+
+    private async void NavigateGrabFrame_Click(object sender, RoutedEventArgs e)
+    {
+        if (Navigator is { } nav)
+            await nav.NavigateRouteAsync(this, "GrabFrame");
+    }
+
+    private async void NavigateQuickLookup_Click(object sender, RoutedEventArgs e)
+    {
+        if (Navigator is { } nav)
+            await nav.NavigateRouteAsync(this, "QuickLookup");
     }
 
     private async void FindAndReplace_Click(object sender, RoutedEventArgs e)
@@ -326,9 +418,58 @@ public sealed partial class EditTextPage : Page
         await dialog.ShowAsync();
     }
 
+    // --- Format ---
+
+    private async void Font_Click(object sender, RoutedEventArgs e)
+    {
+        // Simple font size/family picker
+        var sizeBox = new TextBox { PlaceholderText = "Font size", Text = PassedTextControl.FontSize.ToString() };
+        var familyBox = new TextBox { PlaceholderText = "Font family", Text = PassedTextControl.FontFamily.Source };
+        var panel = new StackPanel { Spacing = 8 };
+        panel.Children.Add(new TextBlock { Text = "Font Family:" });
+        panel.Children.Add(familyBox);
+        panel.Children.Add(new TextBlock { Text = "Font Size:" });
+        panel.Children.Add(sizeBox);
+
+        var dialog = new ContentDialog
+        {
+            Title = "Font Settings",
+            Content = panel,
+            PrimaryButtonText = "Apply",
+            CloseButtonText = "Cancel",
+            XamlRoot = this.XamlRoot,
+        };
+
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        {
+            if (double.TryParse(sizeBox.Text, out double size) && size > 0)
+                PassedTextControl.FontSize = size;
+            if (!string.IsNullOrWhiteSpace(familyBox.Text))
+                PassedTextControl.FontFamily = new Microsoft.UI.Xaml.Media.FontFamily(familyBox.Text);
+        }
+    }
+
+    private async void BottomBarSettings_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Dialogs.BottomBarSettingsDialog { XamlRoot = this.XamlRoot };
+        await dialog.ShowAsync();
+    }
+
+    // --- Help ---
+
     private void About_Click(object sender, RoutedEventArgs e)
     {
         StatusBarText.Text = "Text Grab v5.0 — Uno Platform Edition";
+    }
+
+    private async void Contact_Click(object sender, RoutedEventArgs e)
+    {
+        await Windows.System.Launcher.LaunchUriAsync(new Uri("mailto:joe@JoeFinApps.com"));
+    }
+
+    private async void Feedback_Click(object sender, RoutedEventArgs e)
+    {
+        await Windows.System.Launcher.LaunchUriAsync(new Uri("https://github.com/TheJoeFin/Text-Grab/issues"));
     }
 
     // --- OCR ---

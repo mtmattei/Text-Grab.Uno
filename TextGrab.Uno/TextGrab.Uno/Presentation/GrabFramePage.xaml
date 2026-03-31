@@ -4,7 +4,6 @@
       xmlns:utu="using:Uno.Toolkit.UI"
       xmlns:controls="using:TextGrab.Controls"
       NavigationCacheMode="Required"
-      Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
       KeyDown="Page_KeyDown"
       KeyUp="Page_KeyUp">
 
@@ -37,6 +36,17 @@
       </MenuBarItem>
 
       <MenuBarItem Title="Edit">
+        <MenuFlyoutItem Text="Undo" Click="Undo_Click">
+          <MenuFlyoutItem.KeyboardAccelerators>
+            <KeyboardAccelerator Modifiers="Control" Key="Z" />
+          </MenuFlyoutItem.KeyboardAccelerators>
+        </MenuFlyoutItem>
+        <MenuFlyoutItem Text="Redo" Click="Redo_Click">
+          <MenuFlyoutItem.KeyboardAccelerators>
+            <KeyboardAccelerator Modifiers="Control" Key="Y" />
+          </MenuFlyoutItem.KeyboardAccelerators>
+        </MenuFlyoutItem>
+        <MenuFlyoutSeparator />
         <MenuFlyoutItem Text="Select All" Click="SelectAll_Click">
           <MenuFlyoutItem.KeyboardAccelerators>
             <KeyboardAccelerator Modifiers="Control" Key="A" />
@@ -55,6 +65,9 @@
           </MenuFlyoutItem.KeyboardAccelerators>
         </MenuFlyoutItem>
         <MenuFlyoutSeparator />
+        <MenuFlyoutItem Text="Try To Make Numbers" Click="TryToNumbers_Click" />
+        <MenuFlyoutItem Text="Try To Make Letters" Click="TryToLetters_Click" />
+        <MenuFlyoutSeparator />
         <MenuFlyoutItem Text="Refresh OCR" Click="RefreshOcr_Click">
           <MenuFlyoutItem.KeyboardAccelerators>
             <KeyboardAccelerator Key="F5" />
@@ -63,10 +76,15 @@
       </MenuBarItem>
 
       <MenuBarItem Title="View">
+        <ToggleMenuFlyoutItem x:Name="FreezeToggle" Text="Freeze Image" Click="FreezeToggle_Click" />
         <ToggleMenuFlyoutItem x:Name="TableModeToggle" Text="Table Mode"
                               Click="TableModeToggle_Click" />
         <ToggleMenuFlyoutItem x:Name="EditModeToggle" Text="Edit Words" IsChecked="True"
                               Click="EditModeToggle_Click" />
+      </MenuBarItem>
+
+      <MenuBarItem Title="Help">
+        <MenuFlyoutItem Text="About" Click="About_Click" />
       </MenuBarItem>
     </MenuBar>
 

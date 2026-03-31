@@ -2,8 +2,7 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:utu="using:Uno.Toolkit.UI"
-      NavigationCacheMode="Required"
->
+      NavigationCacheMode="Required">
 
   <Grid>
     <Grid.RowDefinitions>
@@ -90,6 +89,8 @@
           </MenuFlyoutItem.KeyboardAccelerators>
         </MenuFlyoutItem>
         <MenuFlyoutItem Text="Unstack Text (Column)" Click="UnstackGroup_Click" />
+        <MenuFlyoutSeparator />
+        <MenuFlyoutItem Text="Add or Remove at Position..." Click="AddRemoveAt_Click" />
       </MenuBarItem>
 
       <!-- SELECTION -->
@@ -99,6 +100,9 @@
             <KeyboardAccelerator Modifiers="Control" Key="F" />
           </MenuFlyoutItem.KeyboardAccelerators>
         </MenuFlyoutItem>
+        <MenuFlyoutItem Text="Regex Manager..." Click="RegexManager_Click" />
+        <MenuFlyoutSeparator />
+        <MenuFlyoutItem Text="Web Search Selected Text" Click="WebSearch_Click" />
         <MenuFlyoutSeparator />
         <MenuFlyoutItem Text="Select Word" Click="SelectWord_Click">
           <MenuFlyoutItem.KeyboardAccelerators>
@@ -135,6 +139,7 @@
           </MenuFlyoutItem.KeyboardAccelerators>
         </MenuFlyoutItem>
         <MenuFlyoutItem Text="Delete All Instances of Selection" Click="DeleteAllSelection_Click" />
+        <MenuFlyoutItem Text="Delete All Instances (Pattern)" Click="DeleteAllSelectionPattern_Click" />
         <MenuFlyoutItem Text="Insert Selection on Every Line" Click="InsertOnEveryLine_Click" />
         <MenuFlyoutItem Text="Split Before Each Selection" Click="SplitOnSelection_Click" />
         <MenuFlyoutItem Text="Split After Each Selection" Click="SplitAfterSelection_Click" />
@@ -153,14 +158,12 @@
           </MenuFlyoutItem.KeyboardAccelerators>
         </MenuFlyoutItem>
         <MenuFlyoutSeparator />
-        <MenuFlyoutItem Text="New Fullscreen Grab" IsEnabled="False" />
-        <MenuFlyoutItem Text="New Grab Frame" IsEnabled="False">
+        <MenuFlyoutItem Text="New Grab Frame" Click="NavigateGrabFrame_Click">
           <MenuFlyoutItem.KeyboardAccelerators>
             <KeyboardAccelerator Modifiers="Control" Key="G" />
           </MenuFlyoutItem.KeyboardAccelerators>
         </MenuFlyoutItem>
-        <MenuFlyoutSeparator />
-        <MenuFlyoutItem Text="Quick Simple Lookup" IsEnabled="False">
+        <MenuFlyoutItem Text="Quick Simple Lookup" Click="NavigateQuickLookup_Click">
           <MenuFlyoutItem.KeyboardAccelerators>
             <KeyboardAccelerator Modifiers="Control" Key="Q" />
           </MenuFlyoutItem.KeyboardAccelerators>
@@ -173,11 +176,17 @@
                               Text="Wrap Text"
                               IsChecked="True"
                               Click="WrapText_Click" />
+        <MenuFlyoutSeparator />
+        <MenuFlyoutItem Text="Font..." Click="Font_Click" />
+        <MenuFlyoutItem Text="Bottom Bar Settings..." Click="BottomBarSettings_Click" />
       </MenuBarItem>
 
       <!-- HELP -->
       <MenuBarItem Title="Help">
         <MenuFlyoutItem Text="About" Click="About_Click" />
+        <MenuFlyoutSeparator />
+        <MenuFlyoutItem Text="Contact the Developer" Click="Contact_Click" />
+        <MenuFlyoutItem Text="Feedback" Click="Feedback_Click" />
       </MenuBarItem>
     </MenuBar>
 
@@ -211,6 +220,7 @@
           <MenuFlyoutItem Text="Select Line" Click="SelectLine_Click" />
           <MenuFlyoutSeparator />
           <MenuFlyoutItem Text="Toggle Case" Click="ToggleCase_Click" />
+          <MenuFlyoutItem Text="Web Search" Click="WebSearch_Click" />
           <MenuFlyoutItem Text="Delete Selected" Click="DeleteSelected_Click" />
         </MenuFlyout>
       </TextBox.ContextFlyout>

@@ -436,6 +436,7 @@ public sealed partial class GrabFramePage : Page, IGrabFrameHost
     {
         var selected = SelectedWordBorders();
         if (selected.Count < 2) return;
+        PushUndo();
 
         // Compute merged bounds
         double left = selected.Min(wb => wb.Left);
@@ -471,6 +472,7 @@ public sealed partial class GrabFramePage : Page, IGrabFrameHost
 
     private void DeleteSelected_Click(object sender, RoutedEventArgs e)
     {
+        PushUndo();
         var selected = SelectedWordBorders().ToList();
         foreach (var wb in selected)
             RemoveWordBorder(wb);
@@ -613,6 +615,80 @@ public sealed partial class GrabFramePage : Page, IGrabFrameHost
 
         // Keep frame text available for copy
         StatusBarText.Text = $"{_wordBorders.Count} words | {selected.Count} selected";
+    }
+
+    // --- Undo/Redo ---
+
+    private readonly Stack<List<WordBorderInfo>> _undoStack = new();
+    private readonly Stack<List<WordBorderInfo>> _redoStack = new();
+
+    private void PushUndo()
+    {
+        _undoStack.Push(CaptureCurrentState());
+        _redoStack.Clear();
+    }
+
+    private void Undo_Click(object sender, RoutedEventArgs e)
+    {
+        if (_undoStack.Count == 0) return;
+        _redoStack.Push(CaptureCurrentState());
+        RestoreWordBorders(_undoStack.Pop());
+    }
+
+    private void Redo_Click(object sender, RoutedEventArgs e)
+    {
+        if (_redoStack.Count == 0) return;
+        _undoStack.Push(CaptureCurrentState());
+        RestoreWordBorders(_redoStack.Pop());
+    }
+
+    private List<WordBorderInfo> CaptureCurrentState()
+    {
+        return _wordBorders.Select(wb => wb.ToInfo()).ToList();
+    }
+
+    private void RestoreWordBorders(List<WordBorderInfo> state)
+    {
+        RectanglesCanvas.Children.Clear();
+        RectanglesCanvas.Children.Add(SelectBorder);
+        _wordBorders.Clear();
+
+        foreach (var info in state)
+        {
+            var wb = new WordBorder(info);
+            wb.Host = this;
+            _wordBorders.Add(wb);
+            RectanglesCanvas.Children.Add(wb);
+        }
+
+        UpdateFrameText();
+    }
+
+    // --- Text transforms on selected words ---
+
+    private void TryToNumbers_Click(object sender, RoutedEventArgs e)
+    {
+        PushUndo();
+        foreach (var wb in _wordBorders.Where(w => w.IsSelected))
+            wb.Word = wb.Word.TryFixToNumbers();
+    }
+
+    private void TryToLetters_Click(object sender, RoutedEventArgs e)
+    {
+        PushUndo();
+        foreach (var wb in _wordBorders.Where(w => w.IsSelected))
+            wb.Word = wb.Word.TryFixToLetters();
+    }
+
+    private void FreezeToggle_Click(object sender, RoutedEventArgs e)
+    {
+        // Freeze prevents automatic OCR refresh
+        StatusBarText.Text = FreezeToggle.IsChecked ? "Frozen" : "Live";
+    }
+
+    private void About_Click(object sender, RoutedEventArgs e)
+    {
+        StatusBarText.Text = "Text Grab v5.0 — Grab Frame";
     }
 
     private T? GetService<T>() where T : class
