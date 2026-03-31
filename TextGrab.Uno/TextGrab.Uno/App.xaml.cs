@@ -42,11 +42,12 @@ public partial class App : Application
                 {
                     services.AddSingleton<IFileService, FileService>();
 
-                    // OCR engines (platform-specific)
+                    // Platform-specific services
 #if WINDOWS
                     services.AddSingleton<IOcrEngine, WindowsOcrEngine>();
                     services.AddSingleton<IOcrEngine, TesseractOcrEngine>();
                     services.AddSingleton<IOcrEngine, WindowsAiOcrEngine>();
+                    services.AddSingleton<IScreenCaptureService, WindowsScreenCaptureService>();
 #endif
 
                     // OCR services
