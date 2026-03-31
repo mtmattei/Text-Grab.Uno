@@ -399,6 +399,12 @@ public sealed partial class EditTextPage : Page
             await nav.NavigateViewModelAsync<SettingsModel>(this);
     }
 
+    private async void NavigateFullscreenGrab_Click(object sender, RoutedEventArgs e)
+    {
+        if (Navigator is { } nav)
+            await nav.NavigateRouteAsync(this, "FullscreenGrab");
+    }
+
     private async void NavigateGrabFrame_Click(object sender, RoutedEventArgs e)
     {
         if (Navigator is { } nav)

@@ -48,6 +48,8 @@ public partial class App : Application
                     services.AddSingleton<IOcrEngine, TesseractOcrEngine>();
                     services.AddSingleton<IOcrEngine, WindowsAiOcrEngine>();
                     services.AddSingleton<IScreenCaptureService, WindowsScreenCaptureService>();
+                    services.AddSingleton<WindowsHotKeyService>();
+                    services.AddSingleton<IHotKeyService>(sp => sp.GetRequiredService<WindowsHotKeyService>());
 #endif
 
                     // OCR services
@@ -85,7 +87,8 @@ public partial class App : Application
             new ViewMap<LanguageSettingsPage, LanguageSettingsModel>(),
             new ViewMap<KeysSettingsPage, KeysSettingsModel>(),
             new ViewMap<TesseractSettingsPage, TesseractSettingsModel>(),
-            new ViewMap<DangerSettingsPage, DangerSettingsModel>()
+            new ViewMap<DangerSettingsPage, DangerSettingsModel>(),
+            new ViewMap<FullscreenGrabPage, FullscreenGrabModel>()
         );
 
         routes.Register(
@@ -96,6 +99,7 @@ public partial class App : Application
                         Nested:
                         [
                             new("EditText", View: views.FindByViewModel<EditTextModel>(), IsDefault: true),
+                            new("FullscreenGrab", View: views.FindByViewModel<FullscreenGrabModel>()),
                             new("GrabFrame", View: views.FindByViewModel<GrabFrameModel>()),
                             new("QuickLookup", View: views.FindByViewModel<QuickLookupModel>()),
                             new("Settings", View: views.FindByViewModel<SettingsModel>(),

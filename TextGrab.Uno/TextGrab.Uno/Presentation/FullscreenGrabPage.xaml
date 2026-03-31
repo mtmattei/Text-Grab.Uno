@@ -1,0 +1,102 @@
+<Page x:Class="TextGrab.Presentation.FullscreenGrabPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      NavigationCacheMode="Disabled">
+
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <!-- Top toolbar -->
+    <Grid Grid.Row="0" Padding="8,4" ColumnSpacing="8">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+
+      <ComboBox x:Name="LanguagesComboBox"
+                MinWidth="180"
+                PlaceholderText="OCR Language" />
+
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+        <RadioButton x:Name="NormalModeRadio" Content="Standard" IsChecked="True" GroupName="GrabMode" />
+        <RadioButton x:Name="SingleLineModeRadio" Content="Single Line" GroupName="GrabMode" />
+        <RadioButton x:Name="TableModeRadio" Content="Table" GroupName="GrabMode" />
+      </StackPanel>
+
+      <ToggleButton x:Name="SendToEtwToggle"
+                     Grid.Column="3"
+                     Content="Send to Edit Text"
+                     IsChecked="False" />
+
+      <Button Grid.Column="4" Content="Cancel" Click="Cancel_Click" />
+    </Grid>
+
+    <!-- Capture area -->
+    <Grid Grid.Row="1">
+      <!-- Screen capture image (Windows) or placeholder -->
+      <Image x:Name="BackgroundImage"
+             Stretch="UniformToFill"
+             HorizontalAlignment="Stretch"
+             VerticalAlignment="Stretch" />
+
+      <!-- Semi-transparent overlay -->
+      <Canvas x:Name="SelectionCanvas"
+              Background="#40000000"
+              PointerPressed="Canvas_PointerPressed"
+              PointerMoved="Canvas_PointerMoved"
+              PointerReleased="Canvas_PointerReleased">
+
+        <!-- Selection rectangle -->
+        <Border x:Name="SelectionBorder"
+                BorderBrush="#308E98"
+                BorderThickness="2"
+                Background="#20308E98"
+                Visibility="Collapsed" />
+      </Canvas>
+
+      <!-- Non-Windows fallback -->
+      <StackPanel x:Name="FallbackPanel"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center"
+                  Spacing="12"
+                  Visibility="Collapsed">
+        <TextBlock Text="Screen capture is available on Windows Desktop only."
+                   Style="{StaticResource TitleMedium}"
+                   HorizontalAlignment="Center" />
+        <TextBlock Text="Use OCR from Image File or Clipboard instead."
+                   Style="{StaticResource BodyMedium}"
+                   Opacity="0.7"
+                   HorizontalAlignment="Center" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8">
+          <Button Content="OCR from File" Click="OcrFromFile_Click" />
+          <Button Content="OCR from Clipboard" Click="OcrFromClipboard_Click" />
+        </StackPanel>
+      </StackPanel>
+    </Grid>
+
+    <!-- Bottom status / result -->
+    <Grid Grid.Row="2" Padding="12,8" ColumnSpacing="12">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+
+      <TextBlock x:Name="StatusText"
+                 Text="Draw a rectangle to capture text"
+                 Style="{StaticResource BodyMedium}"
+                 VerticalAlignment="Center" />
+
+      <ProgressRing x:Name="BusyRing"
+                    Grid.Column="1"
+                    IsActive="False"
+                    Width="20" Height="20" />
+    </Grid>
+  </Grid>
+</Page>

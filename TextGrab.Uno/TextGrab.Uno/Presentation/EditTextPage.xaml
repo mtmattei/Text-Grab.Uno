@@ -158,6 +158,11 @@
           </MenuFlyoutItem.KeyboardAccelerators>
         </MenuFlyoutItem>
         <MenuFlyoutSeparator />
+        <MenuFlyoutItem Text="New Fullscreen Grab" Click="NavigateFullscreenGrab_Click">
+          <MenuFlyoutItem.KeyboardAccelerators>
+            <KeyboardAccelerator Modifiers="Control" Key="F" />
+          </MenuFlyoutItem.KeyboardAccelerators>
+        </MenuFlyoutItem>
         <MenuFlyoutItem Text="New Grab Frame" Click="NavigateGrabFrame_Click">
           <MenuFlyoutItem.KeyboardAccelerators>
             <KeyboardAccelerator Modifiers="Control" Key="G" />
