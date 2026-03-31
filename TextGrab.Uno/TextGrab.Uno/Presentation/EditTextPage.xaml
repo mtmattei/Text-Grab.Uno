@@ -21,6 +21,7 @@
             <KeyboardAccelerator Modifiers="Control" Key="O" />
           </MenuFlyoutItem.KeyboardAccelerators>
         </MenuFlyoutItem>
+        <MenuFlyoutSubItem x:Name="RecentFilesMenu" Text="Recent Files" />
         <MenuFlyoutSeparator />
         <MenuFlyoutItem Text="Save" Click="Save_Click">
           <MenuFlyoutItem.KeyboardAccelerators>
@@ -173,6 +174,10 @@
             <KeyboardAccelerator Modifiers="Control" Key="Q" />
           </MenuFlyoutItem.KeyboardAccelerators>
         </MenuFlyoutItem>
+        <MenuFlyoutSeparator />
+        <ToggleMenuFlyoutItem x:Name="ClipboardWatcherToggle"
+                              Text="Watch Clipboard for Images"
+                              Click="ClipboardWatcher_Click" />
       </MenuBarItem>
 
       <!-- FORMAT -->
@@ -186,11 +191,22 @@
         <MenuFlyoutItem Text="Bottom Bar Settings..." Click="BottomBarSettings_Click" />
       </MenuBarItem>
 
+      <!-- WINDOW -->
+      <MenuBarItem Title="Window">
+        <ToggleMenuFlyoutItem x:Name="AlwaysOnTopToggle"
+                              Text="Always On Top"
+                              Click="AlwaysOnTop_Click" />
+        <ToggleMenuFlyoutItem x:Name="HideBottomBarToggle"
+                              Text="Hide Bottom Bar"
+                              Click="HideBottomBar_Click" />
+      </MenuBarItem>
+
       <!-- HELP -->
       <MenuBarItem Title="Help">
-        <MenuFlyoutItem Text="About" Click="About_Click" />
+        <MenuFlyoutItem Text="About Text Grab" Click="About_Click" />
         <MenuFlyoutSeparator />
         <MenuFlyoutItem Text="Contact the Developer" Click="Contact_Click" />
+        <MenuFlyoutItem Text="Rate and Review" Click="RateReview_Click" />
         <MenuFlyoutItem Text="Feedback" Click="Feedback_Click" />
       </MenuBarItem>
     </MenuBar>

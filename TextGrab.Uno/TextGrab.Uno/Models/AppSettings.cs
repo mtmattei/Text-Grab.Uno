@@ -66,6 +66,9 @@ public record AppSettings
     // Regex
     public string RegexList { get; init; } = "";
 
+    // Recent files (JSON array of paths)
+    public string RecentFiles { get; init; } = "";
+
     // Other
     public string WebSearchUrl { get; init; } = "https://www.google.com/search?q=";
     public string CustomBottomBarItems { get; init; } = "";

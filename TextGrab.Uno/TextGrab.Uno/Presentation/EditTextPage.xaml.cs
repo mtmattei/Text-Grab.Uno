@@ -19,6 +19,7 @@ public sealed partial class EditTextPage : Page
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         _fileService = this.FindServiceProvider()?.GetService(typeof(IFileService)) as IFileService;
+        LoadRecentFiles();
     }
 
     private INavigator? Navigator => this.FindServiceProvider()?.GetService(typeof(INavigator)) as INavigator;
@@ -461,16 +462,155 @@ public sealed partial class EditTextPage : Page
         await dialog.ShowAsync();
     }
 
+    // --- Window ---
+
+    private void AlwaysOnTop_Click(object sender, RoutedEventArgs e)
+    {
+        // TODO: Requires AppWindow API on Windows to set TopMost
+        StatusBarText.Text = AlwaysOnTopToggle.IsChecked ? "Always on top" : "Normal window";
+    }
+
+    private void HideBottomBar_Click(object sender, RoutedEventArgs e)
+    {
+        var statusBar = this.FindName("StatusBarGrid") as FrameworkElement;
+        // Toggle the status bar row visibility
+        if (this.Content is Grid rootGrid && rootGrid.RowDefinitions.Count >= 3)
+        {
+            rootGrid.RowDefinitions[2].Height = HideBottomBarToggle.IsChecked
+                ? new GridLength(0)
+                : GridLength.Auto;
+        }
+    }
+
+    // --- Clipboard Watcher ---
+
+    private bool _isWatchingClipboard;
+
+    private void ClipboardWatcher_Click(object sender, RoutedEventArgs e)
+    {
+        _isWatchingClipboard = ClipboardWatcherToggle.IsChecked;
+        if (_isWatchingClipboard)
+        {
+            Clipboard.ContentChanged += Clipboard_ContentChanged;
+            StatusBarText.Text = "Watching clipboard for images...";
+        }
+        else
+        {
+            Clipboard.ContentChanged -= Clipboard_ContentChanged;
+            StatusBarText.Text = "Clipboard watcher stopped";
+        }
+    }
+
+    private async void Clipboard_ContentChanged(object? sender, object e)
+    {
+        if (!_isWatchingClipboard) return;
+
+        try
+        {
+            var content = Clipboard.GetContent();
+            if (content.Contains(StandardDataFormats.Bitmap))
+            {
+                StatusBarText.Text = "Image detected in clipboard, running OCR...";
+                OcrFromClipboard_Click(this, new RoutedEventArgs());
+            }
+        }
+        catch { }
+    }
+
+    // --- Recent Files ---
+
+    private void LoadRecentFiles()
+    {
+        RecentFilesMenu.Items.Clear();
+        var settings = ((App)Application.Current).Host?.Services.GetService<IOptions<AppSettings>>();
+        var json = settings?.Value?.RecentFiles;
+        if (string.IsNullOrWhiteSpace(json)) return;
+
+        try
+        {
+            var files = System.Text.Json.JsonSerializer.Deserialize<string[]>(json);
+            if (files is null) return;
+
+            foreach (var path in files.Take(10))
+            {
+                var item = new MenuFlyoutItem { Text = System.IO.Path.GetFileName(path), Tag = path };
+                item.Click += RecentFile_Click;
+                RecentFilesMenu.Items.Add(item);
+            }
+        }
+        catch { }
+    }
+
+    private async void RecentFile_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuFlyoutItem item && item.Tag is string path)
+        {
+            try
+            {
+                var file = await Windows.Storage.StorageFile.GetFileFromPathAsync(path);
+                PassedTextControl.Text = await Windows.Storage.FileIO.ReadTextAsync(file);
+                _openedFilePath = path;
+                StatusBarText.Text = $"Opened: {item.Text}";
+            }
+            catch
+            {
+                StatusBarText.Text = "Could not open recent file";
+            }
+        }
+    }
+
+    private async void AddToRecentFiles(string path)
+    {
+        if (string.IsNullOrEmpty(path)) return;
+
+        var settings = ((App)Application.Current).Host?.Services.GetService<IOptions<AppSettings>>();
+        var json = settings?.Value?.RecentFiles;
+        var files = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(json))
+        {
+            try { files = System.Text.Json.JsonSerializer.Deserialize<List<string>>(json) ?? []; }
+            catch { }
+        }
+
+        files.Remove(path);
+        files.Insert(0, path);
+        if (files.Count > 10) files.RemoveRange(10, files.Count - 10);
+
+        var writableSettings = ((App)Application.Current).Host?.Services
+            .GetService<global::Uno.Extensions.Configuration.IWritableOptions<AppSettings>>();
+        if (writableSettings is not null)
+            await writableSettings.UpdateAsync(s => s with { RecentFiles = System.Text.Json.JsonSerializer.Serialize(files) });
+
+        LoadRecentFiles();
+    }
+
     // --- Help ---
 
-    private void About_Click(object sender, RoutedEventArgs e)
+    private async void About_Click(object sender, RoutedEventArgs e)
     {
-        StatusBarText.Text = "Text Grab v5.0 — Uno Platform Edition";
+        var dialog = new ContentDialog
+        {
+            Title = "About Text Grab",
+            Content = "Text Grab v5.0 — Uno Platform Edition\n\n" +
+                      "An OCR utility for capturing and editing text.\n\n" +
+                      "Originally by Joseph Finney\n" +
+                      "Ported to Uno Platform for cross-platform support.\n\n" +
+                      "https://github.com/TheJoeFin/Text-Grab",
+            CloseButtonText = "Close",
+            XamlRoot = this.XamlRoot,
+        };
+        await dialog.ShowAsync();
     }
 
     private async void Contact_Click(object sender, RoutedEventArgs e)
     {
         await Windows.System.Launcher.LaunchUriAsync(new Uri("mailto:joe@JoeFinApps.com"));
+    }
+
+    private async void RateReview_Click(object sender, RoutedEventArgs e)
+    {
+        await Windows.System.Launcher.LaunchUriAsync(new Uri("https://www.microsoft.com/store/apps/9MZNKqj7SL0B"));
     }
 
     private async void Feedback_Click(object sender, RoutedEventArgs e)

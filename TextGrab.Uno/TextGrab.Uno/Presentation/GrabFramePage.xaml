@@ -91,6 +91,9 @@
     <!-- ============ CENTER: IMAGE + CANVAS ============ -->
     <utu:ZoomContentControl x:Name="MainZoomControl"
                             Grid.Row="1"
+                            AllowDrop="True"
+                            DragOver="Canvas_DragOver"
+                            Drop="Canvas_Drop"
                             MinZoomLevel="0.1"
                             MaxZoomLevel="10"
                             IsZoomAllowed="True">

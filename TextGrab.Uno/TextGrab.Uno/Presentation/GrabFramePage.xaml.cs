@@ -90,9 +90,18 @@ public sealed partial class GrabFramePage : Page, IGrabFrameHost
 
     public void DeleteWordBorder(WordBorder wb) => RemoveWordBorder(wb);
 
+    private WordBorder? _movingWordBorder;
+    private Side _resizeSide = Side.None;
+    private Point _moveStartPoint;
+    private Rect _originalBounds;
+
     public void StartWordBorderMoveResize(WordBorder wb, Side side)
     {
-        // TODO: Wire into move/resize logic in future phase
+        PushUndo();
+        _movingWordBorder = wb;
+        _resizeSide = side;
+        _moveStartPoint = new Point(Canvas.GetLeft(wb), Canvas.GetTop(wb));
+        _originalBounds = new Rect(Canvas.GetLeft(wb), Canvas.GetTop(wb), wb.Width, wb.Height);
     }
 
     // --- Image loading ---
@@ -106,6 +115,39 @@ public sealed partial class GrabFramePage : Page, IGrabFrameHost
         if (data is null || data.Length == 0) return;
 
         await LoadImage(data);
+    }
+
+    private void Canvas_DragOver(object sender, DragEventArgs e)
+    {
+        e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Copy;
+    }
+
+    private async void Canvas_Drop(object sender, DragEventArgs e)
+    {
+        if (e.DataView.Contains(StandardDataFormats.StorageItems))
+        {
+            var items = await e.DataView.GetStorageItemsAsync();
+            foreach (var item in items)
+            {
+                if (item is Windows.Storage.StorageFile file)
+                {
+                    var buffer = await Windows.Storage.FileIO.ReadBufferAsync(file);
+                    var data = new byte[buffer.Length];
+                    using var reader = Windows.Storage.Streams.DataReader.FromBuffer(buffer);
+                    reader.ReadBytes(data);
+                    await LoadImage(data);
+                    return;
+                }
+            }
+        }
+        else if (e.DataView.Contains(StandardDataFormats.Bitmap))
+        {
+            var streamRef = await e.DataView.GetBitmapAsync();
+            using var stream = await streamRef.OpenReadAsync();
+            using var memStream = new MemoryStream();
+            await stream.AsStreamForRead().CopyToAsync(memStream);
+            await LoadImage(memStream.ToArray());
+        }
     }
 
     private async void PasteImage_Click(object sender, RoutedEventArgs e)
@@ -308,9 +350,44 @@ public sealed partial class GrabFramePage : Page, IGrabFrameHost
 
     private void RectanglesCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
     {
-        if (!_isSelecting) return;
-
         var currentPoint = e.GetCurrentPoint(RectanglesCanvas).Position;
+
+        // Handle word border move/resize
+        if (_movingWordBorder is not null)
+        {
+            double dx = currentPoint.X - _clickedPoint.X;
+            double dy = currentPoint.Y - _clickedPoint.Y;
+
+            if (_resizeSide == Side.None)
+            {
+                Canvas.SetLeft(_movingWordBorder, _originalBounds.X + dx);
+                Canvas.SetTop(_movingWordBorder, _originalBounds.Y + dy);
+            }
+            else
+            {
+                double newLeft = _originalBounds.X;
+                double newTop = _originalBounds.Y;
+                double newWidth = _originalBounds.Width;
+                double newHeight = _originalBounds.Height;
+
+                if (_resizeSide == Side.Right)
+                    newWidth = Math.Max(20, _originalBounds.Width + dx);
+                if (_resizeSide == Side.Bottom)
+                    newHeight = Math.Max(10, _originalBounds.Height + dy);
+                if (_resizeSide == Side.Left)
+                { newLeft = _originalBounds.X + dx; newWidth = Math.Max(20, _originalBounds.Width - dx); }
+                if (_resizeSide == Side.Top)
+                { newTop = _originalBounds.Y + dy; newHeight = Math.Max(10, _originalBounds.Height - dy); }
+
+                Canvas.SetLeft(_movingWordBorder, newLeft);
+                Canvas.SetTop(_movingWordBorder, newTop);
+                _movingWordBorder.Width = newWidth;
+                _movingWordBorder.Height = newHeight;
+            }
+            return;
+        }
+
+        if (!_isSelecting) return;
 
         double x = Math.Min(_clickedPoint.X, currentPoint.X);
         double y = Math.Min(_clickedPoint.Y, currentPoint.Y);
@@ -322,13 +399,20 @@ public sealed partial class GrabFramePage : Page, IGrabFrameHost
         SelectBorder.Width = w;
         SelectBorder.Height = h;
 
-        // Live-check intersections
         if (w > 4 || h > 4)
             CheckSelectBorderIntersections();
     }
 
     private void RectanglesCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
     {
+        if (_movingWordBorder is not null)
+        {
+            _movingWordBorder = null;
+            _resizeSide = Side.None;
+            UpdateFrameText();
+            return;
+        }
+
         _isSelecting = false;
         RectanglesCanvas.ReleasePointerCapture(e.Pointer);
 
