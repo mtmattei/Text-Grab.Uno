@@ -1,8 +1,12 @@
+using Uno.Extensions.Configuration;
+
 namespace TextGrab.Presentation;
 
 public sealed partial class FirstRunPage : Page
 {
     private bool _isLoading = true;
+
+    public event EventHandler? FirstRunCompleted;
 
     public FirstRunPage()
     {
@@ -10,16 +14,13 @@ public sealed partial class FirstRunPage : Page
         Loaded += OnLoaded;
     }
 
-    private async void OnLoaded(object sender, RoutedEventArgs e)
+    private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        var model = GetModel();
-        if (model is null) return;
-
         _isLoading = true;
         try
         {
-            // Set default launch radio button
-            var launch = await model.DefaultLaunch ?? "EditText";
+            var settings = ((App)Application.Current).Host?.Services.GetService<IOptions<AppSettings>>();
+            var launch = settings?.Value?.DefaultLaunch ?? "EditText";
             switch (launch)
             {
                 case "Fullscreen": FullScreenRDBTN.IsChecked = true; break;
@@ -28,12 +29,12 @@ public sealed partial class FirstRunPage : Page
                 default: EditWindowRDBTN.IsChecked = true; break;
             }
 
-            NotificationsToggle.IsOn = await model.ShowToast;
-            BackgroundToggle.IsOn = await model.RunInTheBackground;
+            NotificationsToggle.IsOn = settings?.Value?.ShowToast ?? true;
+            BackgroundToggle.IsOn = settings?.Value?.RunInTheBackground ?? false;
 
 #if WINDOWS
             StartupToggle.Visibility = Visibility.Visible;
-            StartupToggle.IsOn = await model.StartupOnLogin;
+            StartupToggle.IsOn = settings?.Value?.StartupOnLogin ?? false;
 #endif
         }
         finally
@@ -42,12 +43,12 @@ public sealed partial class FirstRunPage : Page
         }
     }
 
-    private FirstRunModel? GetModel() =>
-        (DataContext as FirstRunViewModel)?.Model;
+    private IWritableOptions<AppSettings>? GetWritableSettings() =>
+        ((App)Application.Current).Host?.Services.GetService<IWritableOptions<AppSettings>>();
 
     private void RadioButton_Checked(object sender, RoutedEventArgs e)
     {
-        if (_isLoading || GetModel() is not { } model) return;
+        if (_isLoading) return;
 
         string launch;
         if (FullScreenRDBTN.IsChecked == true) launch = "Fullscreen";
@@ -55,68 +56,44 @@ public sealed partial class FirstRunPage : Page
         else if (QuickLookupRDBTN.IsChecked == true) launch = "QuickLookup";
         else launch = "EditText";
 
-        _ = model.SetDefaultLaunch(launch);
+        _ = GetWritableSettings()?.UpdateAsync(s => s with { DefaultLaunch = launch });
     }
 
     private void NotificationsToggle_Toggled(object sender, RoutedEventArgs e)
     {
-        if (_isLoading || GetModel() is not { } model) return;
-        _ = model.ToggleShowToast();
+        if (_isLoading) return;
+        _ = GetWritableSettings()?.UpdateAsync(s => s with { ShowToast = NotificationsToggle.IsOn });
     }
 
     private void BackgroundToggle_Toggled(object sender, RoutedEventArgs e)
     {
-        if (_isLoading || GetModel() is not { } model) return;
-        _ = model.ToggleRunInBackground();
+        if (_isLoading) return;
+        _ = GetWritableSettings()?.UpdateAsync(s => s with { RunInTheBackground = BackgroundToggle.IsOn });
     }
 
     private void StartupToggle_Toggled(object sender, RoutedEventArgs e)
     {
-        if (_isLoading || GetModel() is not { } model) return;
-        _ = model.ToggleStartupOnLogin();
+        if (_isLoading) return;
+        _ = GetWritableSettings()?.UpdateAsync(s => s with { StartupOnLogin = StartupToggle.IsOn });
     }
 
-    private void TryFullscreen_Click(object sender, RoutedEventArgs e)
+    private async void CompleteAndNavigateToShell(object sender, RoutedEventArgs e)
     {
-        // TODO Phase 7: FullscreenGrab not yet ported — navigate to GrabFrame as fallback
-        if (GetModel() is { } model)
-            _ = model.NavigateToDefaultPage();
+        // Mark first run done
+        var ws = GetWritableSettings();
+        if (ws is not null)
+            await ws.UpdateAsync(s => s with { FirstRun = false });
+
+        // Navigate to Shell (sibling route, clear back stack)
+        var navigator = ((App)Application.Current).Host?.Services.GetRequiredService<INavigator>();
+        if (navigator is not null)
+            await navigator.NavigateRouteAsync(this, "Shell");
     }
 
-    private void TryGrabFrame_Click(object sender, RoutedEventArgs e)
-    {
-        if (GetModel() is { } model)
-        {
-            _ = model.CompleteFirstRun();
-            // Navigate via Shell
-        }
-    }
-
-    private void TryEditWindow_Click(object sender, RoutedEventArgs e)
-    {
-        if (GetModel() is { } model)
-        {
-            _ = model.CompleteFirstRun();
-        }
-    }
-
-    private void TryQuickLookup_Click(object sender, RoutedEventArgs e)
-    {
-        if (GetModel() is { } model)
-        {
-            _ = model.CompleteFirstRun();
-        }
-    }
-
-    private void SettingsButton_Click(object sender, RoutedEventArgs e)
-    {
-        if (GetModel() is { } model)
-            _ = model.NavigateToSettings();
-    }
-
-    private void OkayButton_Click(object sender, RoutedEventArgs e)
-    {
-        if (GetModel() is { } model)
-            _ = model.NavigateToDefaultPage();
-    }
+    private void TryFullscreen_Click(object sender, RoutedEventArgs e) => CompleteAndNavigateToShell(sender, e);
+    private void TryGrabFrame_Click(object sender, RoutedEventArgs e) => CompleteAndNavigateToShell(sender, e);
+    private void TryEditWindow_Click(object sender, RoutedEventArgs e) => CompleteAndNavigateToShell(sender, e);
+    private void TryQuickLookup_Click(object sender, RoutedEventArgs e) => CompleteAndNavigateToShell(sender, e);
+    private void SettingsButton_Click(object sender, RoutedEventArgs e) => CompleteAndNavigateToShell(sender, e);
+    private void OkayButton_Click(object sender, RoutedEventArgs e) => CompleteAndNavigateToShell(sender, e);
 }

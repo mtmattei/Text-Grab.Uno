@@ -3,7 +3,6 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:models="using:TextGrab.Models"
       NavigationCacheMode="Required"
-      Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
       KeyDown="Page_KeyDown">
 
   <Grid RowSpacing="0">
@@ -57,7 +56,7 @@
 
     <!-- ============ COLUMN HEADERS ============ -->
     <Grid Grid.Row="1" Padding="16,4,16,4"
-          Background="{ThemeResource SurfaceVariantBrush}">
+          Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="32" />
         <ColumnDefinition Width="*" />
@@ -143,7 +142,7 @@
 
     <!-- ============ STATUS BAR ============ -->
     <Grid Grid.Row="3" Padding="12,6"
-          Background="{ThemeResource SurfaceVariantBrush}">
+          Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="Auto" />

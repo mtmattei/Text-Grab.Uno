@@ -20,7 +20,7 @@
       <TextBlock x:Name="CouldNotFindTessText"
                  Text="Could not locate Tesseract executable"
                  Style="{StaticResource BodyMedium}"
-                 Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                 Foreground="{ThemeResource ErrorBrush}"
                  Margin="48,4,0,0"
                  Visibility="Collapsed" />
 

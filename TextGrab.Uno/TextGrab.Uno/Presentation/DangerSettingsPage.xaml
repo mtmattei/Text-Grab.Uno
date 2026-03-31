@@ -77,7 +77,7 @@
       <TextBlock x:Name="StatusText"
                  Style="{StaticResource BodyMedium}"
                  Margin="0,16,0,0"
-                 Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                 Foreground="{ThemeResource OnSurfaceBrush}" />
 
     </StackPanel>
   </ScrollViewer>

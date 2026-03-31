@@ -52,16 +52,15 @@ public partial record FirstRunModel
         await _settings.UpdateAsync(s => s with { FirstRun = false });
     }
 
+    public async ValueTask NavigateToShell()
+    {
+        await CompleteFirstRun();
+        await _navigator.NavigateRouteAsync(this, "EditText");
+    }
+
     public async ValueTask NavigateToSettings()
     {
         await CompleteFirstRun();
         await _navigator.NavigateRouteAsync(this, "Settings");
-    }
-
-    public async ValueTask NavigateToDefaultPage()
-    {
-        await CompleteFirstRun();
-        var launch = await DefaultLaunch ?? "EditText";
-        await _navigator.NavigateRouteAsync(this, launch);
     }
 }

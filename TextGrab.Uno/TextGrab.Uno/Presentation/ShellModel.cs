@@ -12,14 +12,5 @@ public class ShellModel
         _navigator = navigator;
         _settings = settings;
 
-        CheckFirstRun();
-    }
-
-    private async void CheckFirstRun()
-    {
-        if (_settings.Value?.FirstRun == true)
-        {
-            await _navigator.NavigateRouteAsync(this, "FirstRun");
-        }
     }
 }

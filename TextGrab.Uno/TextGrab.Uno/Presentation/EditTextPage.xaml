@@ -3,7 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:utu="using:Uno.Toolkit.UI"
       NavigationCacheMode="Required"
-      Background="{ThemeResource BackgroundBrush}">
+>
 
   <Grid>
     <Grid.RowDefinitions>
@@ -220,7 +220,7 @@
     <Grid Grid.Row="2"
           Padding="12,6"
           ColumnSpacing="16"
-          Background="{ThemeResource SurfaceVariantBrush}">
+          Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="Auto" />

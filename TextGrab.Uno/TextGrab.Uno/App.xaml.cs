@@ -84,16 +84,14 @@ public partial class App : Application
             new ViewMap<LanguageSettingsPage, LanguageSettingsModel>(),
             new ViewMap<KeysSettingsPage, KeysSettingsModel>(),
             new ViewMap<TesseractSettingsPage, TesseractSettingsModel>(),
-            new ViewMap<DangerSettingsPage, DangerSettingsModel>(),
-            new ViewMap<FirstRunPage, FirstRunModel>()
+            new ViewMap<DangerSettingsPage, DangerSettingsModel>()
         );
 
         routes.Register(
             new RouteMap("", View: views.FindByViewModel<ShellModel>(),
                 Nested:
                 [
-                    new("FirstRun", View: views.FindByViewModel<FirstRunModel>()),
-                    new("Shell", View: views.FindByView<ShellPage>(),
+                    new("Shell", View: views.FindByView<ShellPage>(), IsDefault: true,
                         Nested:
                         [
                             new("EditText", View: views.FindByViewModel<EditTextModel>(), IsDefault: true),

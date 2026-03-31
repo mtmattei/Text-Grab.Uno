@@ -52,14 +52,7 @@
       </NavigationViewItem>
     </NavigationView.FooterMenuItems>
 
-    <Grid uen:Region.Attached="true" uen:Region.Navigator="Visibility">
-      <Grid uen:Region.Name="GeneralSettings" />
-      <Grid uen:Region.Name="FullscreenGrabSettings" />
-      <Grid uen:Region.Name="LanguageSettings" />
-      <Grid uen:Region.Name="KeysSettings" />
-      <Grid uen:Region.Name="TesseractSettings" />
-      <Grid uen:Region.Name="DangerSettings" />
-    </Grid>
+    <Frame uen:Region.Attached="true" />
 
   </NavigationView>
 </Page>
