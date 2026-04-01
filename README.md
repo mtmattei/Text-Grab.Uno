@@ -1,139 +1,173 @@
-<p align="center">
-  <img width="128" align="center" src="images/TealSelect.png">
-</p>
-<h1 align="center">
-  Text Grab
-</h1>
-<p align="center">
-  Copy any text you can see.
-</p>
-<p align="center">
-  <a href="https://www.microsoft.com/en-us/p/text-grab/9mznkqj7sl0b?cid=TextGrabGitHub" target="_blank">
-    <img src="images/storeBadge.png" width="200" alt="Store link" />
-  </a>
-</p>
+# Text-Grab.Uno
 
-<p align="center">
-    <img src="https://img.shields.io/github/downloads/thejoefin/text-grab/total" alt="GitHub Downloads (all assets, all releases)" />
-    <img src="https://img.shields.io/github/v/release/thejoefin/text-grab" alt="GitHub Release" />
-</p>
+> **Text Grab** is a minimal, OCR-focused utility for Windows that lets you capture text from anywhere on screen — screenshots, images, PDFs, or video — and instantly edit, search, or copy it. It features four modes: Fullscreen Grab (screenshot-style region capture), Grab Frame (persistent overlay for picking words), Edit Text (Notepad-like editor with OCR tools), and Quick Simple Lookup (searchable key-value list). Built by [Joseph Finney](https://github.com/TheJoeFin).
+>
+> Original repo: **[github.com/TheJoeFin/Text-Grab](https://github.com/TheJoeFin/Text-Grab)**
 
-### Overview
-![All Modes In Light Mode](images/All-Modes-Light.png)
+---
 
-This is a minimal optical character recognition (OCR) utility for Windows 10/11 which makes all visible text available to be copied. 
+## About This Port
 
-Too often text is trapped within images, videos, or within parts of applications and cannot be selected. Text Grab takes a screenshot, passes that image to the OCR engine, then puts the text into the clipboard for use anywhere. The OCR is done locally by [Windows API](https://docs.microsoft.com/en-us/uwp/api/Windows.Media.Ocr). This enables Text Grab to have essentially no UI and not require a constantly running background process. Working with text can be much more than just copying text from images, so Text Grab has a range of different modes to make working with text fast and easy. 
+This is a cross-platform port of Text-Grab from WPF to [Uno Platform](https://platform.uno), targeting **Windows Desktop** and **WebAssembly**. The goal is feature parity with the original while gaining cross-platform reach and a modern Material Design 3 UI.
 
-I am the author of the [PowerToy Text Extractor](https://learn.microsoft.com/en-us/windows/powertoys/text-extractor). The Full-Screen Grab mode of this app was the basis of that PowerToy
+The port was built incrementally across 8 phases using Claude Code, with every migration pattern, gotcha, and architectural decision documented for reuse.
 
-## How to Install
+| | WPF Original | Uno Port |
+|---|---|---|
+| **LOC** | ~37,000 | ~13,450 |
+| **Framework** | WPF + WPF-UI (Fluent) | Uno Platform (Material MD3) |
+| **Architecture** | Code-behind + Singleton services | MVUX + DI + manual Frame navigation |
+| **Platforms** | Windows only | Windows, WebAssembly, Desktop (Skia) |
+| **Tests** | xUnit | 248 NUnit tests passing |
+| **Theme** | WPF-UI Fluent | Uno Material with custom teal (#308E98) |
 
-### Official
+## Build & Run
 
-- [Microsoft Store](https://www.microsoft.com/en-us/p/text-grab/9mznkqj7sl0b?cid=TextGrabGitHub)
-- [GitHub Releases](https://github.com/TheJoeFin/Text-Grab/releases/latest)
+```bash
+cd TextGrab.Uno
+dotnet build
 
-### Community
+# Windows Desktop
+dotnet run --project TextGrab.Uno --framework net10.0-windows10.0.26100
 
-- [scoop](https://scoop.sh/) — `scoop install text-grab`
-- [choco](https://community.chocolatey.org) - `choco install text-grab`
+# Run tests
+dotnet test
+```
 
-## How to Build
-Get the code:
-- Install git: https://git-scm.com/download/win
-- git clone https://github.com/TheJoeFin/Text-Grab.git
+## What's Ported
 
-### With Visual Studio 2019 or 2022
-- Install the Visual Studio (the free community edition is sufficient).
-    - Install the "Universal Windows Platform Development" workload.
-    - Install the ".NET desktop development" workload.
-    - Install ".NET cross-platform development" toolset
-    - Install Windows 10 SDK (10.0.19041.0)
-- Open `\Text-Grab\Text-Grab.sln` in Visual Studio.
-- Set Text-Grab-Package as Startup Project
-- Set CPU Target to x86 or x64
-- Key F5 or Press "▶ Local Machine"
+### Edit Text — 90% parity (36/40 features)
 
-### With Visual Studio Code (VS Code)
-- Install Visual Studio Code https://code.visualstudio.com/
-- Install .NET 6.0 SDK https://dotnet.microsoft.com/download/dotnet/6.0
-- Open `\Text-Grab\` Folder in VS Code (Same folder as .sln file)
-- Key F5 to launch with debugger
+| Feature | Status |
+|---|---|
+| Open/Save/Save As + Recent Files | Working |
+| Cut/Copy/Paste + OCR Paste (Ctrl+Shift+V) | Working |
+| Make Single Line, Trim, Toggle Case, Remove Duplicates | Working |
+| Replace Reserved Characters, Try Numbers/Letters, Correct GUIDs | Working |
+| Unstack Text (both modes), Add/Remove at Position | Working |
+| Find and Replace (with regex) | Working |
+| Regex Manager (CRUD + real-time testing, 15 defaults) | Working |
+| Web Search selected text | Working |
+| Select Word/Line/All/None, Move Line Up/Down | Working |
+| Isolate/Delete/Insert/Split Selection | Working |
+| Clipboard Watcher (auto-OCR on image) | Working |
+| Font dialog, Word Wrap, Always On Top, Hide Bottom Bar | Working |
+| QR Code generation (ZXing.Net) | Working |
+| Drag & Drop text/files | Working |
+| Status bar (words, chars, line, column) | Working |
+| Navigate to Grab Frame / Quick Lookup / Fullscreen Grab | Working |
+| About / Contact / Feedback / Rate & Review | Working |
+| Calculate Pane | Missing |
+| AI menu (Summarize/Translate/Extract) | Missing |
+| Multiple simultaneous windows | Missing |
 
-## Text Grab has Four Modes
+### Grab Frame — 91% parity (21/23 features)
 
-### 1. Full-Screen Mode (basis of [Text Extractor](https://learn.microsoft.com/en-us/windows/powertoys/text-extractor))
-![Select text from a region](images/FSG-V4.gif)
+| Feature | Status |
+|---|---|
+| Open/Paste/Drag-drop images | Working |
+| OCR with word border overlays | Working |
+| Word selection (click + drag rectangle) | Working |
+| Word move/resize (Ctrl+drag) | Working |
+| Undo/Redo (snapshot stack, capped at 50) | Working |
+| Table mode (ResultTable analysis + table-formatted copy) | Working |
+| Merge/Break/Delete selected words | Working |
+| Search with regex, language selector | Working |
+| Send to Edit Text (copy + navigate) | Working |
+| Zoom (ZoomContentControl) | Working |
+| Barcode/QR detection (ZXing.Net + SkiaSharp) | Working |
+| Try Numbers/Letters on selected words | Working |
+| Freeze toggle, Edit words in-place | Working |
+| Context menu (copy, delete, numbers, letters, merge) | Working |
+| Translation | Missing |
 
-The first full screen use case is the most obvious, selecting a region of the screen and the text within the selected region will be added to the clipboard.
+### Quick Simple Lookup — 83% parity (10/12)
 
-The second use case takes a single click and attempts to copy the word which was clicked on. This is enabled because the Windows 10 OCR API draws a bounding box around each recognized word. 
+| Feature | Status |
+|---|---|
+| Open CSV / Paste data / Save CSV | Working |
+| Search with regex toggle | Working |
+| Copy value/key/both, Delete item, Add row | Working |
+| Insert-on-copy toggle, Send to Edit Text toggle | Working |
+| Keyboard shortcuts (Enter = copy) | Working |
+| Multiple web lookup sources | Missing |
+| History panel | Missing |
 
-If the click point or selected region has no text in it the Text Grab window stays active. To exit the application, press the escape key, right-click and choose cancel, or Alt+F4.
+### Fullscreen Grab — 86% parity (12/14)
 
-### 2. Grab Frame Mode
-![Grab Frame](images/3-2-GF-Editing-Table-2.gif)
+| Feature | Status |
+|---|---|
+| Screen capture background (Windows, P/Invoke + SkiaSharp) | Working |
+| Fullscreen overlay (AppWindow.FullScreen) | Working |
+| Region selection (Canvas drag) | Working |
+| OCR on selected region | Working |
+| Standard / Single Line / Table modes | Working |
+| Keyboard shortcuts (Esc, S, N, T, E) | Working |
+| Language selector, Send to ETW toggle | Working |
+| Barcode detection on capture | Working |
+| Dark overlay with shade setting | Working |
+| Non-Windows fallback (file picker / clipboard) | Working |
+| Single-click word mode | Missing |
+| Post-grab actions dropdown | Missing |
 
-Grab frame is mostly a transparent frame with a search bar and Grab button. The Grab Frame can be positioned wherever you want to copy the text. This can be done by searching for text, clicking on a word border, and/or clicking on the Grab button.
+### Settings — 100% parity (11/11)
 
-The underlying OCR technology is the same as the full screen mode and has all of the same benefits and drawbacks. Since Text Grab is using OCR the recognition is not perfect. However, adjusting the size and position of the window does affect the OCR's accuracy.
+All 6 settings pages working: General, Fullscreen Grab, Languages, Keys, Tesseract, Danger. Theme switching (Light/Dark/System), settings export/import (JSON), run in background with system tray.
 
+### System Integration
 
-### 3. Edit Text Window
+| Feature | Status |
+|---|---|
+| System tray icon (Shell_NotifyIcon) | Working (Windows) |
+| Minimize to tray on close | Working (Windows) |
+| Restore from tray (double-click) | Working (Windows) |
+| In-app notifications (InfoBar) | Working |
+| Global hotkey service (infra) | Infra only |
+| Startup on Login | Missing |
 
-Similar to Notepad, the Edit Text Window is a "Pure Text" editing experience, with no formatting. This means copying text into or out of the Window will remove all formatting, but linebreaks and tabs will remain. Gather text using Full Screen Grabs or Grab Frames.
+### Dialogs — 100% parity (8/8)
 
-There are several tools with in the Edit Text Window which make it quick and easy to fix or change text.
-- List files and folders in chosen directory
-- Watch clipboard for changes
-- Make text into a single line
-- Toggle between UPPERCASE, lowercase, and Titlecase
-- Trim spaces and empty lines
-- Isolate selected text
-- Replace reserved characters (like spaces, /, %, etc.)
-- Find and replace
-- Extract regular expressions
-- Remove duplicate lines
-- Convert stacked data to table format
-- Copy text from every image in a folder
-- Launch URLs
-- And more!
+Find & Replace, Regex Manager, Bottom Bar Settings, Post-Grab Action Editor, Settings Export/Import, First Run, About, Font — all working as ContentDialogs.
 
-### 4. Quick Simple Lookup
-![Quick Simple Lookup](images/Quick-Simple-Lookup.gif)
+### Overall: **~90% feature parity** (103/114 features working)
 
-This mode of Text Grab is not about OCR, but instead it is about retreiving frequently used text. Think of Quick Simple Lookup as your long term memory. Use it to store frequently used URLs, emails, part numbers, etc. Basically a custom dictionary you can edit and recall instantly at any time. The workflow for Quick Simple Lookup is designed to be fast and functional, here is how it works.
+## Architecture
 
-1. Press the hotkey (Default is Win + Shift + Q)
-2. Begin typing to filter the lookup to the item you want
-3. When what you want is the first result, press enter
-4. Then paste the value you just copied into the application you are using
+```
+TextGrab.Uno/
+├── App.xaml(.cs)              # DI, config, route registration
+├── Presentation/              # Pages + MVUX Models
+│   ├── ShellPage              # NavigationView shell (manual Frame.Navigate)
+│   ├── EditTextPage           # Main text editor with full menu system
+│   ├── GrabFramePage          # Image OCR with word border overlays
+│   ├── QuickLookupPage        # CSV key-value search
+│   ├── FullscreenGrabPage     # Screen capture + region OCR
+│   ├── SettingsPage           # Top-nav with 6 sub-pages
+│   └── *SettingsPages         # General, FSG, Language, Keys, Tesseract, Danger
+├── Controls/                  # WordBorder, CollapsibleButton
+├── Dialogs/                   # RegexManager, BottomBar, PostGrabAction
+├── Services/                  # OCR, File, History, Notification, Barcode, Tray
+├── Platforms/Windows/         # Screen capture, hotkeys, tray (P/Invoke)
+├── Models/                    # AppSettings, StoredRegex, ResultTable, etc.
+├── Shared/                    # StringMethods, ClipboardHelper, OcrUtilities
+└── Styles/                    # Material color palette override
+```
 
+### Key Technical Decisions
 
-### Bonus. Command Line Interface
+1. **Manual `Frame.Navigate`** — Uno Extensions region navigation doesn't support re-visiting routes. Manual `SelectionChanged` handlers give full control.
+2. **ContentDialog** for all WPF child windows — simpler than route-based dialogs.
+3. **SkiaSharp** replaces System.Drawing and Magick.NET — cross-platform image processing.
+4. **ZXing.Net** `BarcodeReaderGeneric` with SkiaSharp pixel conversion — cross-platform barcode scanning.
+5. **P/Invoke** for Windows-specific features — screen capture (GDI BitBlt), system tray (Shell_NotifyIcon), hotkeys (RegisterHotKey), fullscreen (AppWindow).
+6. **`IWritableOptions<AppSettings>`** — auto-registered by `Section<T>()`, persists to `appsettings.json`.
 
-Arguments
-- `Fullscreen` launches into Fullscreen Grab mode
-- `GrabFrame` launches a new Grab Frame
-- `EditText` launches a new Edit Text Window
-- "Settings` opens Text Grab settings
-- `"file path"` Text Grab will open the file if it is a Text file, but if it is an image file it will OCR the file and place the results into a new Edit Text Window.
-- `"folder path"` e.g. `.\Text-Grab.exe "C:\Users\myPC\Downloads"` Text Grab will launch a new Edit Text Window and scan all images in that directory.
+## Migration Patterns
 
-## Principles
-Text Grab is designed to have multiple modes, from minimal to fully featured; all focused on productivity. By using Windows 10’s OCR capabilities Text Grab can launch quickly without needing to run in the background. Pinning Text Grab to the Taskbar enables launching via keyboard shortcut. Now with version 2.4 when the background process is enabled Text Grab can be activated from anywhere using global hotkeys. The full-screen mode is designed to be used hundreds of times a day. Reducing clicks and menus means saving time, which is the primary focus of Text Grab. The Grab Frame tool can be positioned on top of any text content for quick OCR any time. When it comes to manipulating the text you've copied the Edit Text Window offers a wide range of tools to speed up common tasks and take the raw text into clean usable content.
+See [`docs/WPF-to-Uno-Migration-Patterns.md`](docs/WPF-to-Uno-Migration-Patterns.md) for the full reference of patterns, gotchas, and lessons learned — including the three failed navigation approaches before finding the working one.
 
-### Packages Used
-- ZXing.Net - Barcode and QR Code scanning: https://github.com/micjahn/ZXing.Net
-- WPF UI - Fluent UI Style: https://github.com/lepoco/wpfui
-- CliWrap: https://github.com/Tyrrrz/CliWrap
-- Microsoft Community Toolkit: https://github.com/CommunityToolkit
+## Credits
 
-### Thanks for using Text Grab
-Hopefully this simple app makes you more productive and saves you time from transcribing text.
-If you have any questions or feedback reach out on Twitter [@TheJoeFin](http://www.twitter.com/thejoefin) or by email joe@textgrab.net
-
-
-### Pssst, on a Mac?
-Check out the awesome app Text Sniper! It is very similar to Text Grab but for Mac! And if you use my [affiliate link here](https://gumroad.com/a/984365907/NYNNM) you will support Text Grab development as well! 
+- **Original app**: [Text-Grab](https://github.com/TheJoeFin/Text-Grab) by [Joseph Finney](https://github.com/TheJoeFin) ([@TheJoeFin](https://twitter.com/thejoefin))
+- **Framework**: [Uno Platform](https://platform.uno)
+- **Migration**: Assisted by Claude (Anthropic)
