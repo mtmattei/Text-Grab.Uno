@@ -53,6 +53,25 @@ public sealed partial class ShellPage : Page
         var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd);
         var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
 
+        // Show system tray icon
+        var trayService = ((App)Application.Current).Host?.Services
+            .GetService<WindowsSystemTrayService>();
+        if (trayService is not null)
+        {
+            trayService.SetWindowHandle(hwnd);
+            trayService.ShowTrayIcon("Text Grab — Running in background");
+            trayService.ShowWindowRequested += (s, e) =>
+            {
+                ShowWindow(hwnd, 9); // SW_RESTORE
+                SetForegroundWindow(hwnd);
+            };
+            trayService.ExitRequested += (s, e) =>
+            {
+                trayService.HideTrayIcon();
+                Application.Current.Exit();
+            };
+        }
+
         if (appWindow is not null)
         {
             appWindow.Closing += (s, args) =>
@@ -61,7 +80,6 @@ public sealed partial class ShellPage : Page
                 if (currentSettings?.Value?.RunInTheBackground == true)
                 {
                     args.Cancel = true;
-                    // Minimize to taskbar instead of closing
                     ShowWindow(hwnd, 6); // SW_MINIMIZE
                 }
             };
@@ -70,6 +88,9 @@ public sealed partial class ShellPage : Page
 
     [System.Runtime.InteropServices.DllImport("user32.dll")]
     private static extern bool ShowWindow(nint hWnd, int nCmdShow);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(nint hWnd);
 #endif
 
     private async Task ShowFirstRunDialogAsync()

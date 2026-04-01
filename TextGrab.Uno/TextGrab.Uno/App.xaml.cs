@@ -50,6 +50,8 @@ public partial class App : Application
                     services.AddSingleton<IScreenCaptureService, WindowsScreenCaptureService>();
                     services.AddSingleton<WindowsHotKeyService>();
                     services.AddSingleton<IHotKeyService>(sp => sp.GetRequiredService<WindowsHotKeyService>());
+                    services.AddSingleton<WindowsSystemTrayService>();
+                    services.AddSingleton<ISystemTrayService>(sp => sp.GetRequiredService<WindowsSystemTrayService>());
 #endif
 
                     // OCR services
