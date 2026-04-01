@@ -19,17 +19,11 @@ public static class ImagePreprocessor
             return input;
 
         // Scale if needed
-        SKBitmap working;
-        if (scaleFactor != 1.0 && scaleFactor > 0)
-        {
-            int newWidth = (int)(original.Width * scaleFactor);
-            int newHeight = (int)(original.Height * scaleFactor);
-            working = original.Resize(new SKImageInfo(newWidth, newHeight), SKFilterQuality.High);
-        }
-        else
-        {
-            working = original.Copy();
-        }
+        using SKBitmap working = (scaleFactor != 1.0 && scaleFactor > 0)
+            ? original.Resize(new SKImageInfo(
+                (int)(original.Width * scaleFactor),
+                (int)(original.Height * scaleFactor)), SKFilterQuality.High)
+            : original.Copy();
 
         // Apply grayscale
         if (grayscale)
@@ -50,7 +44,6 @@ public static class ImagePreprocessor
         data.SaveTo(output);
         output.Position = 0;
 
-        working.Dispose();
         return output;
     }
 

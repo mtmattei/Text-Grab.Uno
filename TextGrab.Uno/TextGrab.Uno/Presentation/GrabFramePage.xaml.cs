@@ -760,6 +760,7 @@ public sealed partial class GrabFramePage : Page, IGrabFrameHost
 
     // --- Undo/Redo ---
 
+    private const int MaxUndoDepth = 50;
     private readonly Stack<List<WordBorderInfo>> _undoStack = new();
     private readonly Stack<List<WordBorderInfo>> _redoStack = new();
 
@@ -767,6 +768,15 @@ public sealed partial class GrabFramePage : Page, IGrabFrameHost
     {
         _undoStack.Push(CaptureCurrentState());
         _redoStack.Clear();
+
+        // Cap undo stack to prevent unbounded memory growth
+        while (_undoStack.Count > MaxUndoDepth)
+        {
+            var items = _undoStack.ToArray();
+            _undoStack.Clear();
+            for (int i = 0; i < items.Length - 1; i++)
+                _undoStack.Push(items[i]);
+        }
     }
 
     private void Undo_Click(object sender, RoutedEventArgs e)

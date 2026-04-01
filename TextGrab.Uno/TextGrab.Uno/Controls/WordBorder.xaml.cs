@@ -102,16 +102,19 @@ public sealed partial class WordBorder : UserControl, INotifyPropertyChanged
         }
     }
 
+    private static readonly SolidColorBrush SelectedBrush = new(Colors.Orange);
+    private static readonly SolidColorBrush DeselectedBrush = new(Windows.UI.Color.FromArgb(255, 48, 142, 152));
+
     public void Select()
     {
         IsSelected = true;
-        WordBorderBorder.BorderBrush = new SolidColorBrush(Colors.Orange);
+        WordBorderBorder.BorderBrush = SelectedBrush;
     }
 
     public void Deselect()
     {
         IsSelected = false;
-        WordBorderBorder.BorderBrush = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 48, 142, 152));
+        WordBorderBorder.BorderBrush = DeselectedBrush;
     }
 
     public void EnterEdit()

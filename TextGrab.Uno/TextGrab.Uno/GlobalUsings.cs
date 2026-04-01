@@ -10,6 +10,6 @@ global using TextGrab.Models;
 global using TextGrab.Presentation;
 global using TextGrab.Services;
 global using TextGrab.Shared;
-global using Uno.Extensions.Http.Kiota;
+
 global using ApplicationExecutionState = Windows.ApplicationModel.Activation.ApplicationExecutionState;
 [assembly: Uno.Extensions.Reactive.Config.BindableGenerationTool(3)]

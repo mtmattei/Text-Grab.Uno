@@ -83,7 +83,7 @@ public class FileHistoryService : IHistoryService
         await WriteHistoryAsync(ct);
     }
 
-    public async Task DeleteAllHistoryAsync(CancellationToken ct = default)
+    public Task DeleteAllHistoryAsync(CancellationToken ct = default)
     {
         _textHistory.Clear();
         _imageHistory.Clear();
@@ -92,6 +92,6 @@ public class FileHistoryService : IHistoryService
         if (File.Exists(path))
             File.Delete(path);
 
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 }
