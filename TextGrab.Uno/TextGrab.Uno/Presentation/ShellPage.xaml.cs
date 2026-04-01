@@ -2,10 +2,35 @@ namespace TextGrab.Presentation;
 
 public sealed partial class ShellPage : Page
 {
+    private static readonly Dictionary<string, Type> PageMap = new()
+    {
+        ["EditText"] = typeof(EditTextPage),
+        ["GrabFrame"] = typeof(GrabFramePage),
+        ["QuickLookup"] = typeof(QuickLookupPage),
+        ["Settings"] = typeof(SettingsPage),
+        ["FullscreenGrab"] = typeof(FullscreenGrabPage),
+    };
+
     public ShellPage()
     {
         this.InitializeComponent();
         Loaded += OnLoaded;
+    }
+
+    private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+    {
+        if (args.SelectedItem is NavigationViewItem item && item.Tag is string tag)
+        {
+            NavigateTo(tag);
+        }
+    }
+
+    public void NavigateTo(string tag)
+    {
+        if (PageMap.TryGetValue(tag, out var pageType))
+        {
+            ContentFrame.Navigate(pageType);
+        }
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -29,18 +54,18 @@ public sealed partial class ShellPage : Page
             global::Uno.Toolkit.UI.SystemThemeHelper.SetApplicationTheme(this.XamlRoot, elementTheme);
         }
 
-        // Wire RunInBackground — minimize instead of close
 #if WINDOWS
         if (settings?.Value?.RunInTheBackground == true)
-        {
             WireBackgroundMode();
-        }
 #endif
 
-        // Check first run
         if (settings?.Value?.FirstRun != false)
-        {
             _ = ShowFirstRunDialogAsync();
+
+        // Navigate to default page
+        if (NavView.MenuItems.Count > 0)
+        {
+            NavView.SelectedItem = NavView.MenuItems[0];
         }
     }
 
@@ -53,7 +78,6 @@ public sealed partial class ShellPage : Page
         var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd);
         var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
 
-        // Show system tray icon
         var trayService = ((App)Application.Current).Host?.Services
             .GetService<WindowsSystemTrayService>();
         if (trayService is not null)
@@ -62,13 +86,8 @@ public sealed partial class ShellPage : Page
             trayService.ShowTrayIcon("Text Grab — Running in background");
             trayService.ShowWindowRequested += (s, e) =>
             {
-                ShowWindow(hwnd, 9); // SW_RESTORE
+                ShowWindow(hwnd, 9);
                 SetForegroundWindow(hwnd);
-            };
-            trayService.ExitRequested += (s, e) =>
-            {
-                trayService.HideTrayIcon();
-                Application.Current.Exit();
             };
         }
 
@@ -80,7 +99,7 @@ public sealed partial class ShellPage : Page
                 if (currentSettings?.Value?.RunInTheBackground == true)
                 {
                     args.Cancel = true;
-                    ShowWindow(hwnd, 6); // SW_MINIMIZE
+                    ShowWindow(hwnd, 6);
                 }
             };
         }
