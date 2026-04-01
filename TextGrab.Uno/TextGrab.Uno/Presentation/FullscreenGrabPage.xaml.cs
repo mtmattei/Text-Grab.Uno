@@ -304,12 +304,9 @@ public sealed partial class FullscreenGrabPage : Page
 
             // Apply mode
             if (SingleLineModeRadio.IsChecked == true || SingleLineCtxItem.IsChecked)
-                text = text.Replace(Environment.NewLine, " ").Replace("\n", " ");
+                text = text.MakeStringSingleLine();
 
-            // Copy to clipboard
-            var dp = new DataPackage();
-            dp.SetText(text);
-            Clipboard.SetContent(dp);
+            ClipboardHelper.CopyText(text);
 
             // Notify
             var notificationService = GetService<INotificationService>();

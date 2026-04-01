@@ -6,8 +6,6 @@ public sealed partial class FirstRunPage : Page
 {
     private bool _isLoading = true;
 
-    public event EventHandler? FirstRunCompleted;
-
     public FirstRunPage()
     {
         this.InitializeComponent();

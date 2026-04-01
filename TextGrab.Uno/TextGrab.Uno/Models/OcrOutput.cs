@@ -21,6 +21,15 @@ public record OcrOutput
     /// <summary>
     /// Applies error correction based on user settings.
     /// </summary>
+    /// <summary>
+    /// Returns the best available text — CleanedOutput if available, otherwise RawOutput.
+    /// </summary>
+    public string GetBestText() =>
+        !string.IsNullOrWhiteSpace(CleanedOutput) ? CleanedOutput : RawOutput;
+
+    /// <summary>
+    /// Applies error correction based on user settings.
+    /// </summary>
     public void CleanOutput(bool correctToLatin, bool correctErrors)
     {
         if (Kind == OcrOutputKind.Barcode)

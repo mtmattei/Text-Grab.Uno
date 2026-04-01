@@ -77,9 +77,7 @@ public sealed partial class EditTextPage : Page
     {
         if (PassedTextControl.SelectionLength > 0)
         {
-            var dp = new DataPackage();
-            dp.SetText(PassedTextControl.SelectedText);
-            Clipboard.SetContent(dp);
+            ClipboardHelper.CopyText(PassedTextControl.SelectedText);
             ReplaceSelection(string.Empty);
         }
     }
@@ -87,11 +85,7 @@ public sealed partial class EditTextPage : Page
     private void Copy_Click(object sender, RoutedEventArgs e)
     {
         if (PassedTextControl.SelectionLength > 0)
-        {
-            var dp = new DataPackage();
-            dp.SetText(PassedTextControl.SelectedText);
-            Clipboard.SetContent(dp);
-        }
+            ClipboardHelper.CopyText(PassedTextControl.SelectedText);
     }
 
     private async void Paste_Click(object sender, RoutedEventArgs e)
@@ -117,9 +111,7 @@ public sealed partial class EditTextPage : Page
 
     private void CopyClose_Click(object sender, RoutedEventArgs e)
     {
-        var dp = new DataPackage();
-        dp.SetText(PassedTextControl.Text);
-        Clipboard.SetContent(dp);
+        ClipboardHelper.CopyText(PassedTextControl.Text);
         StatusBarText.Text = "Copied to clipboard";
     }
 
@@ -684,8 +676,7 @@ public sealed partial class EditTextPage : Page
         var ocrService = this.FindServiceProvider()?.GetService(typeof(IOcrService)) as IOcrService;
         if (ocrService is null) return;
 
-        var content = Clipboard.GetContent();
-        if (!content.Contains(StandardDataFormats.Bitmap))
+        if (!ClipboardHelper.HasBitmap())
         {
             StatusBarText.Text = "No image in clipboard";
             return;
@@ -694,18 +685,14 @@ public sealed partial class EditTextPage : Page
         StatusBarText.Text = "OCR Paste...";
         try
         {
-            var streamRef = await content.GetBitmapAsync();
-            using var randomStream = await streamRef.OpenReadAsync();
-            using var memStream = new MemoryStream();
-            await randomStream.AsStreamForRead().CopyToAsync(memStream);
-            memStream.Position = 0;
+            using var memStream = await ClipboardHelper.GetBitmapStreamFromClipboardAsync();
+            if (memStream is null) { StatusBarText.Text = "Failed to read clipboard"; return; }
 
             var result = await ocrService.RecognizeAsync(memStream);
             if (result is not null)
             {
-                string text = result.CleanedOutput ?? result.RawOutput;
-                ReplaceSelection(text); // Insert directly at cursor
-                StatusBarText.Text = $"OCR pasted {text.Length} chars";
+                ReplaceSelection(result.GetBestText());
+                StatusBarText.Text = $"OCR pasted {result.GetBestText().Length} chars";
             }
             else
             {

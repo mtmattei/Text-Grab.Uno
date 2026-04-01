@@ -533,14 +533,12 @@ public sealed partial class GrabFramePage : Page, IGrabFrameHost
 
         if (!string.IsNullOrEmpty(text))
         {
-            var dp = new DataPackage();
-            dp.SetText(text);
-            Clipboard.SetContent(dp);
+            ClipboardHelper.CopyText(text);
             StatusBarText.Text = _isTableMode ? "Table copied to clipboard" : "Copied to clipboard";
         }
     }
 
-    private void SendToEditWindow_Click(object sender, RoutedEventArgs e)
+    private async void SendToEditWindow_Click(object sender, RoutedEventArgs e)
     {
         // Navigate to EditText with the OCR text
         UpdateFrameText();
@@ -549,10 +547,7 @@ public sealed partial class GrabFramePage : Page, IGrabFrameHost
             ? string.Join(Environment.NewLine, selected.Select(wb => wb.Word))
             : string.Join(Environment.NewLine, _wordBorders.Select(wb => wb.Word));
 
-        // Copy text to clipboard so EditText can paste it
-        var dp = new DataPackage();
-        dp.SetText(text);
-        Clipboard.SetContent(dp);
+        ClipboardHelper.CopyText(text);
 
         var navigator = GetService<INavigator>();
         if (navigator is not null)
