@@ -47,7 +47,7 @@ public sealed partial class GrabFramePage : Page, IGrabFrameHost
 
     public void UndoableWordChange(WordBorder wb, string oldWord)
     {
-        // TODO: Wire into undo/redo system in future phase
+        PushUndo();
         UpdateFrameText();
     }
 
@@ -487,17 +487,29 @@ public sealed partial class GrabFramePage : Page, IGrabFrameHost
     private void CopyText_Click(object sender, RoutedEventArgs e)
     {
         UpdateFrameText();
-        var selected = SelectedWordBorders();
-        string text = selected.Count > 0
-            ? string.Join(Environment.NewLine, selected.Select(wb => wb.Word))
-            : string.Join(Environment.NewLine, _wordBorders.Select(wb => wb.Word));
+        var wordsToCopy = SelectedWordBorders();
+        if (wordsToCopy.Count == 0)
+            wordsToCopy = _wordBorders.ToList();
+
+        string text;
+        if (_isTableMode)
+        {
+            var wordInfos = wordsToCopy.Select(wb => wb.ToInfo()).ToList();
+            var sb = new StringBuilder();
+            ResultTable.GetTextFromTabledWordBorders(sb, wordInfos, true);
+            text = sb.ToString();
+        }
+        else
+        {
+            text = string.Join(Environment.NewLine, wordsToCopy.Select(wb => wb.Word));
+        }
 
         if (!string.IsNullOrEmpty(text))
         {
             var dp = new DataPackage();
             dp.SetText(text);
             Clipboard.SetContent(dp);
-            StatusBarText.Text = "Copied to clipboard";
+            StatusBarText.Text = _isTableMode ? "Table copied to clipboard" : "Copied to clipboard";
         }
     }
 
@@ -510,8 +522,14 @@ public sealed partial class GrabFramePage : Page, IGrabFrameHost
             ? string.Join(Environment.NewLine, selected.Select(wb => wb.Word))
             : string.Join(Environment.NewLine, _wordBorders.Select(wb => wb.Word));
 
-        // TODO: Navigate with data to EditTextPage
-        StatusBarText.Text = "Sent to Edit Window";
+        // Copy text to clipboard so EditText can paste it
+        var dp = new DataPackage();
+        dp.SetText(text);
+        Clipboard.SetContent(dp);
+
+        var navigator = GetService<INavigator>();
+        if (navigator is not null)
+            _ = navigator.NavigateRouteAsync(this, "EditText");
     }
 
     // --- Word management ---
@@ -608,7 +626,24 @@ public sealed partial class GrabFramePage : Page, IGrabFrameHost
         _isTableMode = TableToggleButton.IsChecked == true || TableModeToggle.IsChecked;
         TableToggleButton.IsChecked = _isTableMode;
         TableModeToggle.IsChecked = _isTableMode;
-        // TODO: Wire table analysis from ResultTable in future
+
+        if (_isTableMode && _wordBorders.Count > 0)
+            AnalyzeAsTable();
+    }
+
+    private void AnalyzeAsTable()
+    {
+        var wordInfos = _wordBorders.Select(wb => wb.ToInfo()).ToList();
+        var resultTable = new ResultTable(ref wordInfos, 1.0, 1.0);
+
+        // Update word borders with row/column IDs from table analysis
+        for (int i = 0; i < wordInfos.Count && i < _wordBorders.Count; i++)
+        {
+            _wordBorders[i].ResultRowID = wordInfos[i].ResultRowID;
+            _wordBorders[i].ResultColumnID = wordInfos[i].ResultColumnID;
+        }
+
+        StatusBarText.Text = $"Table: {resultTable.Rows.Count} rows × {resultTable.Columns.Count} cols";
     }
 
     // --- Search ---

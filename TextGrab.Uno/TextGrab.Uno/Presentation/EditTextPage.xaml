@@ -67,6 +67,11 @@
             <KeyboardAccelerator Modifiers="Control" Key="V" />
           </MenuFlyoutItem.KeyboardAccelerators>
         </MenuFlyoutItem>
+        <MenuFlyoutItem Text="OCR Paste (Clipboard Image)" Click="OcrPaste_Click">
+          <MenuFlyoutItem.KeyboardAccelerators>
+            <KeyboardAccelerator Modifiers="Control,Shift" Key="V" />
+          </MenuFlyoutItem.KeyboardAccelerators>
+        </MenuFlyoutItem>
         <MenuFlyoutSeparator />
         <MenuFlyoutItem Text="Make Single Line" Click="MakeSingleLine_Click" />
         <MenuFlyoutItem Text="Trim Each Line" Click="TrimEachLine_Click" />

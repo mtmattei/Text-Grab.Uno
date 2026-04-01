@@ -36,20 +36,72 @@ public sealed partial class DangerSettingsPage : Page
 
     private async void ExportBugReportButton_Click(object sender, RoutedEventArgs e)
     {
-        // TODO Phase 7: Implement DiagnosticsUtilities.SaveBugReportToFileAsync()
-        await ShowStatusAsync("Bug report export is not yet implemented.");
+        var settings = ((App)Application.Current).Host?.Services.GetService<IOptions<AppSettings>>();
+        var info = $"Text Grab Uno v5.0\n" +
+                   $"Date: {DateTime.Now}\n" +
+                   $"OS: {System.Runtime.InteropServices.RuntimeInformation.OSDescription}\n" +
+                   $"Arch: {System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture}\n" +
+                   $"Settings: {System.Text.Json.JsonSerializer.Serialize(settings?.Value)}";
+
+        var dp = new Windows.ApplicationModel.DataTransfer.DataPackage();
+        dp.SetText(info);
+        Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(dp);
+        await ShowStatusAsync("Bug report copied to clipboard.");
     }
 
     private async void ExportSettingsButton_Click(object sender, RoutedEventArgs e)
     {
-        // TODO Phase 7: Implement settings export
-        await ShowStatusAsync("Settings export is not yet implemented.");
+        var settings = ((App)Application.Current).Host?.Services.GetService<IOptions<AppSettings>>();
+        if (settings?.Value is null) return;
+
+        var json = System.Text.Json.JsonSerializer.Serialize(settings.Value,
+            new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+
+        var picker = new Windows.Storage.Pickers.FileSavePicker();
+        picker.SuggestedFileName = "TextGrab-Settings";
+        picker.FileTypeChoices.Add("JSON", [".json"]);
+
+#if WINDOWS
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
+        WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+#endif
+
+        var file = await picker.PickSaveFileAsync();
+        if (file is not null)
+        {
+            await Windows.Storage.FileIO.WriteTextAsync(file, json);
+            await ShowStatusAsync("Settings exported.");
+        }
     }
 
     private async void ImportSettingsButton_Click(object sender, RoutedEventArgs e)
     {
-        // TODO Phase 7: Implement settings import
-        await ShowStatusAsync("Settings import is not yet implemented.");
+        var picker = new Windows.Storage.Pickers.FileOpenPicker();
+        picker.FileTypeFilter.Add(".json");
+
+#if WINDOWS
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
+        WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+#endif
+
+        var file = await picker.PickSingleFileAsync();
+        if (file is null) return;
+
+        var json = await Windows.Storage.FileIO.ReadTextAsync(file);
+        var imported = System.Text.Json.JsonSerializer.Deserialize<AppSettings>(json);
+        if (imported is null)
+        {
+            await ShowStatusAsync("Invalid settings file.");
+            return;
+        }
+
+        var writableSettings = ((App)Application.Current).Host?.Services
+            .GetService<global::Uno.Extensions.Configuration.IWritableOptions<AppSettings>>();
+        if (writableSettings is not null)
+        {
+            await writableSettings.UpdateAsync(_ => imported);
+            await ShowStatusAsync("Settings imported. Restart app for full effect.");
+        }
     }
 
     private void OverrideArchToggle_Toggled(object sender, RoutedEventArgs e)

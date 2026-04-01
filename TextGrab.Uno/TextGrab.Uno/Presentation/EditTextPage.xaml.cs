@@ -466,7 +466,16 @@ public sealed partial class EditTextPage : Page
 
     private void AlwaysOnTop_Click(object sender, RoutedEventArgs e)
     {
-        // TODO: Requires AppWindow API on Windows to set TopMost
+#if WINDOWS
+        if (App.MainWindow is not null)
+        {
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
+            var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd);
+            var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
+            if (appWindow?.Presenter is Microsoft.UI.Windowing.OverlappedPresenter presenter)
+                presenter.IsAlwaysOnTop = AlwaysOnTopToggle.IsChecked;
+        }
+#endif
         StatusBarText.Text = AlwaysOnTopToggle.IsChecked ? "Always on top" : "Normal window";
     }
 
@@ -616,6 +625,47 @@ public sealed partial class EditTextPage : Page
     private async void Feedback_Click(object sender, RoutedEventArgs e)
     {
         await Windows.System.Launcher.LaunchUriAsync(new Uri("https://github.com/TheJoeFin/Text-Grab/issues"));
+    }
+
+    // --- OCR Paste (directly insert OCR'd clipboard image as text) ---
+
+    private async void OcrPaste_Click(object sender, RoutedEventArgs e)
+    {
+        var ocrService = this.FindServiceProvider()?.GetService(typeof(IOcrService)) as IOcrService;
+        if (ocrService is null) return;
+
+        var content = Clipboard.GetContent();
+        if (!content.Contains(StandardDataFormats.Bitmap))
+        {
+            StatusBarText.Text = "No image in clipboard";
+            return;
+        }
+
+        StatusBarText.Text = "OCR Paste...";
+        try
+        {
+            var streamRef = await content.GetBitmapAsync();
+            using var randomStream = await streamRef.OpenReadAsync();
+            using var memStream = new MemoryStream();
+            await randomStream.AsStreamForRead().CopyToAsync(memStream);
+            memStream.Position = 0;
+
+            var result = await ocrService.RecognizeAsync(memStream);
+            if (result is not null)
+            {
+                string text = result.CleanedOutput ?? result.RawOutput;
+                ReplaceSelection(text); // Insert directly at cursor
+                StatusBarText.Text = $"OCR pasted {text.Length} chars";
+            }
+            else
+            {
+                StatusBarText.Text = "OCR returned no results";
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusBarText.Text = $"OCR paste failed: {ex.Message}";
+        }
     }
 
     // --- OCR ---
