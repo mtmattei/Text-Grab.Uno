@@ -282,6 +282,26 @@ public sealed partial class FullscreenGrabPage : Page
                 ? result.CleanedOutput
                 : result.RawOutput;
 
+            // Try barcode detection if enabled and OCR returned little/no text
+            var settings = GetService<IOptions<AppSettings>>();
+            if (settings?.Value?.ReadBarcodesOnGrab == true && imageStream.CanSeek)
+            {
+                imageStream.Position = 0;
+                using var barcodeMs = new MemoryStream();
+                await imageStream.CopyToAsync(barcodeMs);
+                var barcodeService = GetService<IBarcodeService>();
+                if (barcodeService is not null)
+                {
+                    var barcodeText = await barcodeService.ReadBarcodeFromImageAsync(barcodeMs.ToArray());
+                    if (!string.IsNullOrEmpty(barcodeText))
+                    {
+                        text = string.IsNullOrWhiteSpace(text)
+                            ? $"[Barcode] {barcodeText}"
+                            : $"{text}{Environment.NewLine}[Barcode] {barcodeText}";
+                    }
+                }
+            }
+
             // Apply mode
             if (SingleLineModeRadio.IsChecked == true || SingleLineCtxItem.IsChecked)
                 text = text.Replace(Environment.NewLine, " ").Replace("\n", " ");

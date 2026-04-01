@@ -58,6 +58,7 @@ public partial class App : Application
                     services.AddSingleton<ILanguageService, LanguageService>();
                     services.AddSingleton<IOcrService, OcrService>();
 
+                    services.AddSingleton<IBarcodeService, BarcodeService>();
                     services.AddSingleton<IHistoryService, FileHistoryService>();
                     services.AddSingleton<InAppNotificationService>();
                     services.AddSingleton<INotificationService>(sp => sp.GetRequiredService<InAppNotificationService>());

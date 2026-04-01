@@ -250,6 +250,33 @@ public sealed partial class GrabFramePage : Page, IGrabFrameHost
         _ocrResult = result.StructuredResult;
         CreateWordBordersFromOcr(_ocrResult);
 
+        // Try barcode detection if enabled
+        var settings = GetService<IOptions<AppSettings>>();
+        if (settings?.Value?.ReadBarcodesOnGrab == true)
+        {
+            var barcodeService = GetService<IBarcodeService>();
+            if (barcodeService is not null)
+            {
+                var barcodeText = await barcodeService.ReadBarcodeFromImageAsync(_currentImageData);
+                if (!string.IsNullOrEmpty(barcodeText))
+                {
+                    // Add barcode result as a word border at bottom of image
+                    var wb = new WordBorder(new WordBorderInfo
+                    {
+                        Word = barcodeText,
+                        BorderRect = new Windows.Foundation.Rect(10, RectanglesCanvas.Height - 40, 300, 30),
+                        IsBarcode = true,
+                    });
+                    wb.Host = this;
+                    _wordBorders.Add(wb);
+                    RectanglesCanvas.Children.Add(wb);
+
+                    StatusBarText.Text = $"{_wordBorders.Count} words + barcode found ({result.Engine})";
+                    return;
+                }
+            }
+        }
+
         StatusBarText.Text = $"{_wordBorders.Count} words found ({result.Engine})";
     }
 
