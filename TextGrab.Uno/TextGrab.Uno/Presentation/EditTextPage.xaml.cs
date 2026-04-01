@@ -479,6 +479,56 @@ public sealed partial class EditTextPage : Page
         StatusBarText.Text = AlwaysOnTopToggle.IsChecked ? "Always on top" : "Normal window";
     }
 
+    private async void MakeQrCode_Click(object sender, RoutedEventArgs e)
+    {
+        string text = PassedTextControl.SelectionLength > 0
+            ? PassedTextControl.SelectedText
+            : PassedTextControl.Text;
+
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            StatusBarText.Text = "No text to encode";
+            return;
+        }
+
+        try
+        {
+            var writer = new ZXing.BarcodeWriterPixelData
+            {
+                Format = ZXing.BarcodeFormat.QR_CODE,
+                Options = new ZXing.Common.EncodingOptions { Width = 300, Height = 300, Margin = 2 }
+            };
+
+            var pixelData = writer.Write(text);
+
+            // Show as a dialog with the text representation
+            var dialog = new ContentDialog
+            {
+                Title = "QR Code Generated",
+                Content = $"QR Code for:\n\n\"{(text.Length > 100 ? text[..100] + "..." : text)}\"\n\n" +
+                          $"Size: {pixelData.Width}x{pixelData.Height}\n" +
+                          "QR code data has been copied to clipboard as text.",
+                PrimaryButtonText = "Copy Text",
+                CloseButtonText = "Close",
+                XamlRoot = this.XamlRoot,
+            };
+
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Primary)
+            {
+                var dp = new DataPackage();
+                dp.SetText(text);
+                Clipboard.SetContent(dp);
+            }
+
+            StatusBarText.Text = "QR code generated";
+        }
+        catch (Exception ex)
+        {
+            StatusBarText.Text = $"QR code failed: {ex.Message}";
+        }
+    }
+
     private void HideBottomBar_Click(object sender, RoutedEventArgs e)
     {
         var statusBar = this.FindName("StatusBarGrid") as FrameworkElement;

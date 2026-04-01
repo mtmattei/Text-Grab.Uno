@@ -29,12 +29,48 @@ public sealed partial class ShellPage : Page
             global::Uno.Toolkit.UI.SystemThemeHelper.SetApplicationTheme(this.XamlRoot, elementTheme);
         }
 
-        // Check first run — show dialog
+        // Wire RunInBackground — minimize instead of close
+#if WINDOWS
+        if (settings?.Value?.RunInTheBackground == true)
+        {
+            WireBackgroundMode();
+        }
+#endif
+
+        // Check first run
         if (settings?.Value?.FirstRun != false)
         {
             _ = ShowFirstRunDialogAsync();
         }
     }
+
+#if WINDOWS
+    private void WireBackgroundMode()
+    {
+        if (App.MainWindow is null) return;
+
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
+        var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd);
+        var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
+
+        if (appWindow is not null)
+        {
+            appWindow.Closing += (s, args) =>
+            {
+                var currentSettings = ((App)Application.Current).Host?.Services.GetService<IOptions<AppSettings>>();
+                if (currentSettings?.Value?.RunInTheBackground == true)
+                {
+                    args.Cancel = true;
+                    // Minimize to taskbar instead of closing
+                    ShowWindow(hwnd, 6); // SW_MINIMIZE
+                }
+            };
+        }
+    }
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool ShowWindow(nint hWnd, int nCmdShow);
+#endif
 
     private async Task ShowFirstRunDialogAsync()
     {
@@ -55,7 +91,6 @@ public sealed partial class ShellPage : Page
 
         await dialog.ShowAsync();
 
-        // Mark first run complete
         var writableSettings = ((App)Application.Current).Host?.Services
             .GetService<global::Uno.Extensions.Configuration.IWritableOptions<AppSettings>>();
         if (writableSettings is not null)

@@ -198,6 +198,8 @@
 
       <!-- WINDOW -->
       <MenuBarItem Title="Window">
+        <MenuFlyoutItem Text="Make QR Code from Selection" Click="MakeQrCode_Click" />
+        <MenuFlyoutSeparator />
         <ToggleMenuFlyoutItem x:Name="AlwaysOnTopToggle"
                               Text="Always On Top"
                               Click="AlwaysOnTop_Click" />

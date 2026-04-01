@@ -160,7 +160,12 @@ public sealed partial class QuickLookupPage : Page
 
     private void CopySelected_Click(object sender, RoutedEventArgs e) => CopySelection();
 
-    private void ItemsListView_ItemClick(object sender, ItemClickEventArgs e) { }
+    private void ItemsListView_ItemClick(object sender, ItemClickEventArgs e)
+    {
+        // Auto-copy on select when toggle is on
+        if (InsertOnCopyToggle.IsChecked == true)
+            CopySelection();
+    }
 
     private void ItemsListView_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
         => CopySelection();
@@ -193,6 +198,14 @@ public sealed partial class QuickLookupPage : Page
         dp.SetText(sb.ToString());
         Clipboard.SetContent(dp);
         StatusBarText.Text = $"Copied {selected.Count} item{(selected.Count != 1 ? "s" : "")}";
+
+        // Navigate to EditText if toggle is on
+        if (SendToEtwToggle.IsChecked == true)
+        {
+            var navigator = ((App)Application.Current).Host?.Services.GetService<INavigator>();
+            if (navigator is not null)
+                _ = navigator.NavigateRouteAsync(this, "EditText");
+        }
     }
 
     // --- Context menu ---
@@ -233,6 +246,18 @@ public sealed partial class QuickLookupPage : Page
         ApplySearch();
         SaveButton.Visibility = Visibility.Visible;
         StatusBarText.Text = "Row added";
+    }
+
+    private void InsertOnCopyToggle_Click(object sender, RoutedEventArgs e)
+    {
+        StatusBarText.Text = InsertOnCopyToggle.IsChecked == true
+            ? "Insert on copy: ON" : "Insert on copy: OFF";
+    }
+
+    private void SendToEtwToggle_Click(object sender, RoutedEventArgs e)
+    {
+        StatusBarText.Text = SendToEtwToggle.IsChecked == true
+            ? "Send to Edit Text: ON" : "Send to Edit Text: OFF";
     }
 
     // --- Keyboard ---
