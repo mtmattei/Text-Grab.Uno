@@ -1,209 +1,173 @@
 # Text-Grab.Uno
 
-Cross-platform port of [Text-Grab](https://github.com/TheJoeFin/Text-Grab) (WPF OCR utility by Joseph Finney) to [Uno Platform](https://platform.uno).
+> **Text Grab** is a minimal, OCR-focused utility for Windows that lets you capture text from anywhere on screen — screenshots, images, PDFs, or video — and instantly edit, search, or copy it. It features four modes: Fullscreen Grab (screenshot-style region capture), Grab Frame (persistent overlay for picking words), Edit Text (Notepad-like editor with OCR tools), and Quick Simple Lookup (searchable key-value list). Built by [Joseph Finney](https://github.com/TheJoeFin).
+>
+> Original repo: **[github.com/TheJoeFin/Text-Grab](https://github.com/TheJoeFin/Text-Grab)**
 
-## Overview
+---
 
-Text-Grab is a desktop OCR utility that captures text from screens, images, and files. This project ports the WPF app to Uno Platform for cross-platform support (Windows Desktop + WebAssembly).
+## About This Port
 
-| Metric | Value |
-|--------|-------|
-| **WPF Original** | ~37,000 LOC |
-| **Uno Port** | ~13,450 LOC |
-| **Unit Tests** | 248 passing |
-| **Targets** | Windows Desktop, WebAssembly, Desktop (Skia), .NET generic |
-| **Architecture** | MVUX + manual Frame navigation |
-| **Theme** | Uno Material (MD3) with custom teal primary (#308E98) |
+This is a cross-platform port of Text-Grab from WPF to [Uno Platform](https://platform.uno), targeting **Windows Desktop** and **WebAssembly**. The goal is feature parity with the original while gaining cross-platform reach and a modern Material Design 3 UI.
+
+The port was built incrementally across 8 phases using Claude Code, with every migration pattern, gotcha, and architectural decision documented for reuse.
+
+| | WPF Original | Uno Port |
+|---|---|---|
+| **LOC** | ~37,000 | ~13,450 |
+| **Framework** | WPF + WPF-UI (Fluent) | Uno Platform (Material MD3) |
+| **Architecture** | Code-behind + Singleton services | MVUX + DI + manual Frame navigation |
+| **Platforms** | Windows only | Windows, WebAssembly, Desktop (Skia) |
+| **Tests** | xUnit | 248 NUnit tests passing |
+| **Theme** | WPF-UI Fluent | Uno Material with custom teal (#308E98) |
 
 ## Build & Run
 
 ```bash
-# Build all targets
 cd TextGrab.Uno
 dotnet build
 
-# Run Windows Desktop
+# Windows Desktop
 dotnet run --project TextGrab.Uno --framework net10.0-windows10.0.26100
 
 # Run tests
 dotnet test
 ```
 
-## Architecture
+## What's Ported
 
-- **Uno.Sdk** Single Project with MVUX, Material, Navigation, Toolkit
-- **Manual Frame.Navigate** for NavigationView (Uno Extensions regions don't support re-visiting routes)
-- **Settings** via `IWritableOptions<AppSettings>` with `appsettings.json` persistence
-- **OCR engines**: Windows Runtime OCR, Tesseract (CLI), Windows AI — all behind `IOcrEngine` interface
-- **Platform-specific** services (`#if WINDOWS`): screen capture, hotkeys, system tray
+### Edit Text — 90% parity (36/40 features)
 
-## Feature Parity Matrix (~87%)
+| Feature | Status |
+|---|---|
+| Open/Save/Save As + Recent Files | Working |
+| Cut/Copy/Paste + OCR Paste (Ctrl+Shift+V) | Working |
+| Make Single Line, Trim, Toggle Case, Remove Duplicates | Working |
+| Replace Reserved Characters, Try Numbers/Letters, Correct GUIDs | Working |
+| Unstack Text (both modes), Add/Remove at Position | Working |
+| Find and Replace (with regex) | Working |
+| Regex Manager (CRUD + real-time testing, 15 defaults) | Working |
+| Web Search selected text | Working |
+| Select Word/Line/All/None, Move Line Up/Down | Working |
+| Isolate/Delete/Insert/Split Selection | Working |
+| Clipboard Watcher (auto-OCR on image) | Working |
+| Font dialog, Word Wrap, Always On Top, Hide Bottom Bar | Working |
+| QR Code generation (ZXing.Net) | Working |
+| Drag & Drop text/files | Working |
+| Status bar (words, chars, line, column) | Working |
+| Navigate to Grab Frame / Quick Lookup / Fullscreen Grab | Working |
+| About / Contact / Feedback / Rate & Review | Working |
+| Calculate Pane | Missing |
+| AI menu (Summarize/Translate/Extract) | Missing |
+| Multiple simultaneous windows | Missing |
 
-### Edit Text Window
+### Grab Frame — 91% parity (21/23 features)
 
-| Feature | WPF | Uno | Status |
-|---|---|---|---|
-| Open/Save/Save As | Yes | Yes | Working |
-| Recent Files menu | Yes | Yes | Working |
-| Copy All and Close | Yes | Yes | Working |
-| Undo/Redo | Built-in | Built-in | Working |
-| Cut/Copy/Paste | Yes | Yes | Working |
-| OCR Paste (Ctrl+Shift+V) | Yes | Yes | Working |
-| Make Single Line | Yes | Yes | Working |
-| Trim Each Line | Yes | Yes | Working |
-| Toggle Case (Shift+F3) | Yes | Yes | Working |
-| Remove Duplicate Lines | Yes | Yes | Working |
-| Replace Reserved Characters | Yes | Yes | Working |
-| Try To Numbers / Letters | Yes | Yes | Working |
-| Correct GUIDs | Yes | Yes | Working |
-| Unstack Text (both modes) | Yes | Yes | Working |
-| Add/Remove at Position | Yes | Yes | Working |
-| Find and Replace (regex) | Yes | Yes | Working |
-| Regex Manager | Yes | Yes | Working |
-| Web Search selected text | Yes | Yes | Working |
-| Select Word/Line/All/None | Yes | Yes | Working |
-| Move Line Up/Down | Yes | Yes | Working |
-| Isolate/Delete/Insert Selection | Yes | Yes | Working |
-| Split Before/After Selection | Yes | Yes | Working |
-| Delete All Instances | Yes | Yes | Working |
-| OCR from Image File | Yes | Yes | Working |
-| OCR from Clipboard | Yes | Yes | Working |
-| Clipboard Watcher (auto-OCR) | Yes | Yes | Working |
-| Word Wrap toggle | Yes | Yes | Working |
-| Font dialog | Yes | Yes | Working |
-| Bottom Bar Settings | Yes | Yes | Working |
-| Always On Top | Yes | Yes | Working (Windows) |
-| Hide Bottom Bar | Yes | Yes | Working |
-| QR Code generation | Yes | Yes | Working |
-| About / Contact / Feedback | Yes | Yes | Working |
-| Navigate to other pages | Yes | Yes | Working |
-| Drag & Drop text/files | Yes | Yes | Working |
-| Status bar (words/chars/line) | Yes | Yes | Working |
-| Calculate Pane | Yes | No | Missing |
-| AI menu (Summarize/Translate) | Yes | No | Missing |
-| Multiple windows | Yes | No | Missing (single-window) |
+| Feature | Status |
+|---|---|
+| Open/Paste/Drag-drop images | Working |
+| OCR with word border overlays | Working |
+| Word selection (click + drag rectangle) | Working |
+| Word move/resize (Ctrl+drag) | Working |
+| Undo/Redo (snapshot stack, capped at 50) | Working |
+| Table mode (ResultTable analysis + table-formatted copy) | Working |
+| Merge/Break/Delete selected words | Working |
+| Search with regex, language selector | Working |
+| Send to Edit Text (copy + navigate) | Working |
+| Zoom (ZoomContentControl) | Working |
+| Barcode/QR detection (ZXing.Net + SkiaSharp) | Working |
+| Try Numbers/Letters on selected words | Working |
+| Freeze toggle, Edit words in-place | Working |
+| Context menu (copy, delete, numbers, letters, merge) | Working |
+| Translation | Missing |
 
-### Grab Frame
+### Quick Simple Lookup — 83% parity (10/12)
 
-| Feature | WPF | Uno | Status |
-|---|---|---|---|
-| Open/Paste Image | Yes | Yes | Working |
-| Drag-drop image files | Yes | Yes | Working |
-| OCR with word borders | Yes | Yes | Working |
-| Word selection (click/drag) | Yes | Yes | Working |
-| Word move/resize | Yes | Yes | Working |
-| Undo/Redo (snapshot stack) | Yes | Yes | Working |
-| Table mode (ResultTable) | Yes | Yes | Working |
-| Merge/Break/Delete words | Yes | Yes | Working |
-| Search with regex | Yes | Yes | Working |
-| Language selection | Yes | Yes | Working |
-| Send to Edit Text | Yes | Yes | Working |
-| Zoom (ZoomContentControl) | Yes | Yes | Working |
-| Barcode detection | Yes | Yes | Working |
-| Try Numbers/Letters on words | Yes | Yes | Working |
-| Freeze toggle | Yes | Yes | Working |
-| Edit words in-place | Yes | Yes | Working |
-| Translation | Yes | No | Missing |
+| Feature | Status |
+|---|---|
+| Open CSV / Paste data / Save CSV | Working |
+| Search with regex toggle | Working |
+| Copy value/key/both, Delete item, Add row | Working |
+| Insert-on-copy toggle, Send to Edit Text toggle | Working |
+| Keyboard shortcuts (Enter = copy) | Working |
+| Multiple web lookup sources | Missing |
+| History panel | Missing |
 
-### Quick Simple Lookup
+### Fullscreen Grab — 86% parity (12/14)
 
-| Feature | WPF | Uno | Status |
-|---|---|---|---|
-| Open CSV / Paste data | Yes | Yes | Working |
-| Search with regex toggle | Yes | Yes | Working |
-| Copy selected value/key/both | Yes | Yes | Working |
-| Delete item / Add row | Yes | Yes | Working |
-| Save CSV | Yes | Yes | Working |
-| Insert-on-copy toggle | Yes | Yes | Working |
-| Send to Edit Text toggle | Yes | Yes | Working |
-| Keyboard (Enter=copy) | Yes | Yes | Working |
-| Multiple web lookup sources | Yes | No | Missing |
-| History panel | Yes | No | Missing |
+| Feature | Status |
+|---|---|
+| Screen capture background (Windows, P/Invoke + SkiaSharp) | Working |
+| Fullscreen overlay (AppWindow.FullScreen) | Working |
+| Region selection (Canvas drag) | Working |
+| OCR on selected region | Working |
+| Standard / Single Line / Table modes | Working |
+| Keyboard shortcuts (Esc, S, N, T, E) | Working |
+| Language selector, Send to ETW toggle | Working |
+| Barcode detection on capture | Working |
+| Dark overlay with shade setting | Working |
+| Non-Windows fallback (file picker / clipboard) | Working |
+| Single-click word mode | Missing |
+| Post-grab actions dropdown | Missing |
 
-### Fullscreen Grab
+### Settings — 100% parity (11/11)
 
-| Feature | WPF | Uno | Status |
-|---|---|---|---|
-| Screen capture background | Yes | Yes | Working (Windows) |
-| Fullscreen overlay mode | Yes | Yes | Working (AppWindow) |
-| Region selection (drag) | Yes | Yes | Working |
-| OCR on region | Yes | Yes | Working |
-| Standard/SingleLine/Table modes | Yes | Yes | Working |
-| Keyboard shortcuts (Esc/S/N/T/E) | Yes | Yes | Working |
-| Language selector | Yes | Yes | Working |
-| Send to ETW toggle | Yes | Yes | Working |
-| Barcode detection | Yes | Yes | Working |
-| Dark overlay with shade setting | Yes | Yes | Working |
-| Non-Windows fallback | N/A | Yes | Working |
-| Single-click word mode | Yes | No | Missing |
-| Post-grab actions dropdown | Yes | No | Missing |
-
-### Settings
-
-| Feature | WPF | Uno | Status |
-|---|---|---|---|
-| General (theme/launch/toast/etc) | Yes | Yes | Working |
-| Fullscreen Grab settings | Yes | Yes | Working |
-| Language settings | Yes | Yes | Working |
-| Keyboard shortcuts page | Yes | Yes | Working (UI) |
-| Tesseract settings | Yes | Yes | Working |
-| Danger (reset/export/import) | Yes | Yes | Working |
-| Settings export/import JSON | Yes | Yes | Working |
-| Theme switching (Light/Dark/System) | Yes | Yes | Working |
-| Run in Background (tray) | Yes | Yes | Working (Windows) |
-| System tray icon | Yes | Yes | Working (Windows) |
+All 6 settings pages working: General, Fullscreen Grab, Languages, Keys, Tesseract, Danger. Theme switching (Light/Dark/System), settings export/import (JSON), run in background with system tray.
 
 ### System Integration
 
-| Feature | WPF | Uno | Status |
-|---|---|---|---|
-| System tray icon | Yes | Yes | Working (Windows) |
-| Minimize to tray on close | Yes | Yes | Working (Windows) |
-| Restore from tray | Yes | Yes | Working (Windows) |
-| In-app notifications | Toast | InfoBar | Working |
-| Global hotkey service | Yes | Yes | Infra only |
+| Feature | Status |
+|---|---|
+| System tray icon (Shell_NotifyIcon) | Working (Windows) |
+| Minimize to tray on close | Working (Windows) |
+| Restore from tray (double-click) | Working (Windows) |
+| In-app notifications (InfoBar) | Working |
+| Global hotkey service (infra) | Infra only |
+| Startup on Login | Missing |
 
-### Dialogs
+### Dialogs — 100% parity (8/8)
 
-| Feature | WPF | Uno | Status |
-|---|---|---|---|
-| Find and Replace | Yes | Yes | Working |
-| Regex Manager (CRUD + test) | Yes | Yes | Working |
-| Bottom Bar Settings | Yes | Yes | Working |
-| Post-Grab Action Editor | Yes | Yes | Working |
-| Settings Export/Import | Yes | Yes | Working |
-| First Run welcome | Yes | Yes | Working |
-| About dialog | Yes | Yes | Working |
-| Font dialog | Yes | Yes | Working |
+Find & Replace, Regex Manager, Bottom Bar Settings, Post-Grab Action Editor, Settings Export/Import, First Run, About, Font — all working as ContentDialogs.
 
-### Summary
+### Overall: **~90% feature parity** (103/114 features working)
 
-| Category | Working | Missing | Parity |
-|---|---|---|---|
-| Edit Text | 36/40 | 4 | 90% |
-| Grab Frame | 21/23 | 2 | 91% |
-| Quick Lookup | 10/12 | 2 | 83% |
-| Fullscreen Grab | 12/14 | 2 | 86% |
-| Settings | 11/11 | 0 | 100% |
-| System | 5/6 | 1 | 83% |
-| Dialogs | 8/8 | 0 | 100% |
-| **Overall** | **103/114** | **11** | **~90%** |
+## Architecture
+
+```
+TextGrab.Uno/
+├── App.xaml(.cs)              # DI, config, route registration
+├── Presentation/              # Pages + MVUX Models
+│   ├── ShellPage              # NavigationView shell (manual Frame.Navigate)
+│   ├── EditTextPage           # Main text editor with full menu system
+│   ├── GrabFramePage          # Image OCR with word border overlays
+│   ├── QuickLookupPage        # CSV key-value search
+│   ├── FullscreenGrabPage     # Screen capture + region OCR
+│   ├── SettingsPage           # Top-nav with 6 sub-pages
+│   └── *SettingsPages         # General, FSG, Language, Keys, Tesseract, Danger
+├── Controls/                  # WordBorder, CollapsibleButton
+├── Dialogs/                   # RegexManager, BottomBar, PostGrabAction
+├── Services/                  # OCR, File, History, Notification, Barcode, Tray
+├── Platforms/Windows/         # Screen capture, hotkeys, tray (P/Invoke)
+├── Models/                    # AppSettings, StoredRegex, ResultTable, etc.
+├── Shared/                    # StringMethods, ClipboardHelper, OcrUtilities
+└── Styles/                    # Material color palette override
+```
+
+### Key Technical Decisions
+
+1. **Manual `Frame.Navigate`** — Uno Extensions region navigation doesn't support re-visiting routes. Manual `SelectionChanged` handlers give full control.
+2. **ContentDialog** for all WPF child windows — simpler than route-based dialogs.
+3. **SkiaSharp** replaces System.Drawing and Magick.NET — cross-platform image processing.
+4. **ZXing.Net** `BarcodeReaderGeneric` with SkiaSharp pixel conversion — cross-platform barcode scanning.
+5. **P/Invoke** for Windows-specific features — screen capture (GDI BitBlt), system tray (Shell_NotifyIcon), hotkeys (RegisterHotKey), fullscreen (AppWindow).
+6. **`IWritableOptions<AppSettings>`** — auto-registered by `Section<T>()`, persists to `appsettings.json`.
 
 ## Migration Patterns
 
-See [`WPF-to-Uno-Migration-Patterns.md`](docs/WPF-to-Uno-Migration-Patterns.md) for detailed patterns, gotchas, and lessons learned during the migration.
-
-## Key Technical Decisions
-
-1. **Manual Frame.Navigate** over Uno Extensions region navigation (regions don't support re-visiting routes)
-2. **ContentDialog** for all WPF child windows/dialogs
-3. **SkiaSharp** replaces System.Drawing and Magick.NET
-4. **ZXing.Net** BarcodeReaderGeneric with SkiaSharp pixel conversion for cross-platform barcode scanning
-5. **P/Invoke** for Windows-specific features (screen capture, system tray, hotkeys)
-6. **IWritableOptions<AppSettings>** for persistent settings (auto-registered by `Section<T>()`)
+See [`docs/WPF-to-Uno-Migration-Patterns.md`](docs/WPF-to-Uno-Migration-Patterns.md) for the full reference of patterns, gotchas, and lessons learned — including the three failed navigation approaches before finding the working one.
 
 ## Credits
 
-- Original app: [Text-Grab](https://github.com/TheJoeFin/Text-Grab) by Joseph Finney
-- Framework: [Uno Platform](https://platform.uno)
-- Migration assisted by Claude (Anthropic)
+- **Original app**: [Text-Grab](https://github.com/TheJoeFin/Text-Grab) by [Joseph Finney](https://github.com/TheJoeFin) ([@TheJoeFin](https://twitter.com/thejoefin))
+- **Framework**: [Uno Platform](https://platform.uno)
+- **Migration**: Assisted by Claude (Anthropic)
