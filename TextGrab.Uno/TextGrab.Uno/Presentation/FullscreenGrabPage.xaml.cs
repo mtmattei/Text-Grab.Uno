@@ -1,4 +1,5 @@
 using Microsoft.UI.Xaml.Media.Imaging;
+using Microsoft.UI.Xaml.Input;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
 
@@ -16,12 +17,18 @@ public sealed partial class FullscreenGrabPage : Page
     {
         this.InitializeComponent();
         Loaded += OnLoaded;
+        Unloaded += OnUnloaded;
     }
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
         _ocrService = GetService<IOcrService>();
         _captureService = GetService<IScreenCaptureService>();
+
+        // Maximize the window for fullscreen overlay effect
+#if WINDOWS
+        MaximizeWindow();
+#endif
 
         // Load languages
         var langService = GetService<ILanguageService>();
@@ -37,45 +44,149 @@ public sealed partial class FullscreenGrabPage : Page
         if (_captureService?.IsSupported == true)
         {
             StatusText.Text = "Capturing screen...";
+
+            // Brief delay to let window maximize before capture
+            await Task.Delay(100);
+
+            // Minimize our window, capture screen, then restore
+            MinimizeWindow();
+            await Task.Delay(200);
+
             _capturedScreen = await _captureService.CaptureScreenAsync();
+
+            MaximizeWindow();
+
             if (_capturedScreen is not null)
             {
                 var bitmapImage = new BitmapImage();
                 await bitmapImage.SetSourceAsync(_capturedScreen.AsRandomAccessStream());
                 BackgroundImage.Source = bitmapImage;
-                _capturedScreen.Position = 0; // Reset for OCR later
-                StatusText.Text = "Draw a rectangle to capture text, or click a word";
+                _capturedScreen.Position = 0;
+                StatusText.Text = "Draw a rectangle to capture text, or press Esc to cancel";
+
+                // Apply shade overlay from settings
+                var settings = GetService<IOptions<AppSettings>>();
+                if (settings?.Value?.FsgShadeOverlay == false)
+                    SelectionCanvas.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                        Microsoft.UI.Colors.Transparent);
             }
             else
             {
-                StatusText.Text = "Screen capture failed — try OCR from file instead";
+                StatusText.Text = "Screen capture failed";
             }
         }
         else
         {
             FallbackPanel.Visibility = Visibility.Visible;
             SelectionCanvas.Visibility = Visibility.Collapsed;
+            FloatingToolbar.Visibility = Visibility.Collapsed;
         }
 #else
         FallbackPanel.Visibility = Visibility.Visible;
         SelectionCanvas.Visibility = Visibility.Collapsed;
+        FloatingToolbar.Visibility = Visibility.Collapsed;
 #endif
 
-        // Apply settings
-        var settings = GetService<IOptions<AppSettings>>();
-        if (settings?.Value is not null)
+        // Apply default mode from settings
+        var appSettings = GetService<IOptions<AppSettings>>();
+        if (appSettings?.Value is not null)
         {
-            SendToEtwToggle.IsChecked = settings.Value.FsgSendEtwToggle;
-            switch (settings.Value.FsgDefaultMode)
+            SendToEtwToggle.IsChecked = appSettings.Value.FsgSendEtwToggle;
+            switch (appSettings.Value.FsgDefaultMode)
             {
                 case "SingleLine": SingleLineModeRadio.IsChecked = true; break;
                 case "Table": TableModeRadio.IsChecked = true; break;
                 default: NormalModeRadio.IsChecked = true; break;
             }
         }
+
+        // Focus for keyboard input
+        this.Focus(FocusState.Programmatic);
     }
 
-    private void Canvas_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    private void OnUnloaded(object sender, RoutedEventArgs e)
+    {
+#if WINDOWS
+        RestoreWindow();
+#endif
+        _capturedScreen?.Dispose();
+        _capturedScreen = null;
+    }
+
+    // --- Window management (Windows-only) ---
+
+#if WINDOWS
+    private void MaximizeWindow()
+    {
+        if (App.MainWindow is not null)
+        {
+            var appWindow = GetAppWindow();
+            if (appWindow is not null)
+            {
+                appWindow.SetPresenter(Microsoft.UI.Windowing.AppWindowPresenterKind.FullScreen);
+            }
+        }
+    }
+
+    private void MinimizeWindow()
+    {
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
+        ShowWindow(hwnd, 6); // SW_MINIMIZE
+    }
+
+    private void RestoreWindow()
+    {
+        var appWindow = GetAppWindow();
+        if (appWindow is not null)
+        {
+            appWindow.SetPresenter(Microsoft.UI.Windowing.AppWindowPresenterKind.Default);
+        }
+    }
+
+    private static Microsoft.UI.Windowing.AppWindow? GetAppWindow()
+    {
+        if (App.MainWindow is null) return null;
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
+        var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd);
+        return Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
+    }
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool ShowWindow(nint hWnd, int nCmdShow);
+#endif
+
+    // --- Keyboard ---
+
+    private void Page_KeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case Windows.System.VirtualKey.Escape:
+                Cancel_Click(sender, e);
+                e.Handled = true;
+                break;
+            case Windows.System.VirtualKey.S:
+                SingleLineModeRadio.IsChecked = true;
+                e.Handled = true;
+                break;
+            case Windows.System.VirtualKey.N:
+                NormalModeRadio.IsChecked = true;
+                e.Handled = true;
+                break;
+            case Windows.System.VirtualKey.T:
+                TableModeRadio.IsChecked = true;
+                e.Handled = true;
+                break;
+            case Windows.System.VirtualKey.E:
+                SendToEtwToggle.IsChecked = !SendToEtwToggle.IsChecked;
+                e.Handled = true;
+                break;
+        }
+    }
+
+    // --- Canvas selection ---
+
+    private void Canvas_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
         _isSelecting = true;
         _startPoint = e.GetCurrentPoint(SelectionCanvas).Position;
@@ -89,7 +200,7 @@ public sealed partial class FullscreenGrabPage : Page
         SelectionCanvas.CapturePointer(e.Pointer);
     }
 
-    private void Canvas_PointerMoved(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    private void Canvas_PointerMoved(object sender, PointerRoutedEventArgs e)
     {
         if (!_isSelecting) return;
 
@@ -106,7 +217,7 @@ public sealed partial class FullscreenGrabPage : Page
         SelectionBorder.Height = h;
     }
 
-    private async void Canvas_PointerReleased(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    private async void Canvas_PointerReleased(object sender, PointerRoutedEventArgs e)
     {
         if (!_isSelecting) return;
         _isSelecting = false;
@@ -121,7 +232,6 @@ public sealed partial class FullscreenGrabPage : Page
             return;
         }
 
-        // Get selection region relative to the image
         var region = new Rect(
             Canvas.GetLeft(SelectionBorder),
             Canvas.GetTop(SelectionBorder),
@@ -129,6 +239,8 @@ public sealed partial class FullscreenGrabPage : Page
 
         await RunOcrOnRegionAsync(region);
     }
+
+    // --- OCR ---
 
     private async Task RunOcrOnRegionAsync(Rect region)
     {
@@ -142,13 +254,10 @@ public sealed partial class FullscreenGrabPage : Page
             Stream? imageStream = null;
 
 #if WINDOWS
-            // Capture just the selected region
             if (_captureService is not null)
-            {
                 imageStream = await _captureService.CaptureRegionAsync(region);
-            }
 #endif
-            // Fallback: use full captured screen (less accurate but works)
+
             if (imageStream is null && _capturedScreen is not null)
             {
                 _capturedScreen.Position = 0;
@@ -164,7 +273,8 @@ public sealed partial class FullscreenGrabPage : Page
             var result = await _ocrService.RecognizeAsync(imageStream);
             if (result is null)
             {
-                StatusText.Text = "OCR returned no results";
+                StatusText.Text = "OCR returned no results — try a larger selection";
+                SelectionBorder.Visibility = Visibility.Collapsed;
                 return;
             }
 
@@ -173,7 +283,7 @@ public sealed partial class FullscreenGrabPage : Page
                 : result.RawOutput;
 
             // Apply mode
-            if (SingleLineModeRadio.IsChecked == true)
+            if (SingleLineModeRadio.IsChecked == true || SingleLineCtxItem.IsChecked)
                 text = text.Replace(Environment.NewLine, " ").Replace("\n", " ");
 
             // Copy to clipboard
@@ -181,17 +291,21 @@ public sealed partial class FullscreenGrabPage : Page
             dp.SetText(text);
             Clipboard.SetContent(dp);
 
+            // Notify
+            var notificationService = GetService<INotificationService>();
+            notificationService?.ShowSuccess($"Copied: {(text.Length > 60 ? text[..60] + "..." : text)}");
+
             StatusText.Text = $"Copied {text.Length} chars ({result.Engine})";
 
-            // Show notification
-            var notificationService = GetService<INotificationService>();
-            notificationService?.ShowSuccess($"Text copied: {(text.Length > 50 ? text[..50] + "..." : text)}");
+            // Auto-navigate back after successful grab
+            await Task.Delay(500);
 
-            // Navigate to Edit Text if toggle is on
             if (SendToEtwToggle.IsChecked == true)
             {
-                // TODO: Pass text data to EditText via navigation data
+                // Navigate to EditText — TODO: pass text data
             }
+
+            Cancel_Click(this, new RoutedEventArgs());
         }
         catch (Exception ex)
         {
@@ -204,6 +318,8 @@ public sealed partial class FullscreenGrabPage : Page
         }
     }
 
+    // --- Fallback handlers ---
+
     private async void OcrFromFile_Click(object sender, RoutedEventArgs e)
     {
         var fileService = GetService<IFileService>();
@@ -213,18 +329,17 @@ public sealed partial class FullscreenGrabPage : Page
         if (imageData is null) return;
 
         BusyRing.IsActive = true;
-        StatusText.Text = "Running OCR on image...";
+        StatusText.Text = "Running OCR...";
 
         using var stream = new MemoryStream(imageData);
         var result = await _ocrService.RecognizeAsync(stream);
 
         if (result is not null)
         {
-            string text = result.CleanedOutput ?? result.RawOutput;
             var dp = new DataPackage();
-            dp.SetText(text);
+            dp.SetText(result.CleanedOutput ?? result.RawOutput);
             Clipboard.SetContent(dp);
-            StatusText.Text = $"Copied {text.Length} chars";
+            StatusText.Text = $"Copied {(result.CleanedOutput ?? result.RawOutput).Length} chars";
         }
         else
         {
@@ -246,7 +361,7 @@ public sealed partial class FullscreenGrabPage : Page
         }
 
         BusyRing.IsActive = true;
-        StatusText.Text = "Running OCR on clipboard image...";
+        StatusText.Text = "Running OCR on clipboard...";
 
         var streamRef = await content.GetBitmapAsync();
         using var randomStream = await streamRef.OpenReadAsync();
@@ -258,11 +373,10 @@ public sealed partial class FullscreenGrabPage : Page
 
         if (result is not null)
         {
-            string text = result.CleanedOutput ?? result.RawOutput;
             var dp = new DataPackage();
-            dp.SetText(text);
+            dp.SetText(result.CleanedOutput ?? result.RawOutput);
             Clipboard.SetContent(dp);
-            StatusText.Text = $"Copied {text.Length} chars";
+            StatusText.Text = $"Copied {(result.CleanedOutput ?? result.RawOutput).Length} chars";
         }
         else
         {
@@ -272,11 +386,18 @@ public sealed partial class FullscreenGrabPage : Page
         BusyRing.IsActive = false;
     }
 
+    // --- Navigation ---
+
     private void Cancel_Click(object sender, RoutedEventArgs e)
     {
         var navigator = GetService<INavigator>();
-        if (navigator is not null)
-            _ = navigator.NavigateRouteAsync(this, "EditText");
+        _ = navigator?.NavigateRouteAsync(this, "EditText");
+    }
+
+    private void Settings_Click(object sender, RoutedEventArgs e)
+    {
+        var navigator = GetService<INavigator>();
+        _ = navigator?.NavigateRouteAsync(this, "Settings");
     }
 
     private T? GetService<T>() where T : class
