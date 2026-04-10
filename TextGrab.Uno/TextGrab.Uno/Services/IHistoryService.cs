@@ -10,7 +10,6 @@ public interface IHistoryService
     IReadOnlyList<HistoryInfo> GetTextHistory();
     IReadOnlyList<HistoryInfo> GetImageHistory();
     Task SaveTextHistoryAsync(HistoryInfo item, CancellationToken ct = default);
-    Task RemoveHistoryItemAsync(HistoryInfo item, CancellationToken ct = default);
     Task DeleteAllHistoryAsync(CancellationToken ct = default);
 }
 

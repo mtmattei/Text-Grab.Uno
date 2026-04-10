@@ -128,9 +128,7 @@ public partial record EditTextModel
                 return;
             }
 
-            string ocrText = !string.IsNullOrWhiteSpace(result.CleanedOutput)
-                ? result.CleanedOutput
-                : result.RawOutput;
+            string ocrText = result.GetBestText();
 
             var currentText = await Text;
             if (string.IsNullOrEmpty(currentText))
@@ -179,9 +177,7 @@ public partial record EditTextModel
                 return;
             }
 
-            string ocrText = !string.IsNullOrWhiteSpace(result.CleanedOutput)
-                ? result.CleanedOutput
-                : result.RawOutput;
+            string ocrText = result.GetBestText();
 
             var currentText = await Text;
             if (string.IsNullOrEmpty(currentText))

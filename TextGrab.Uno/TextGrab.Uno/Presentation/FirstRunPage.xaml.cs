@@ -17,7 +17,7 @@ public sealed partial class FirstRunPage : Page
         _isLoading = true;
         try
         {
-            var settings = ((App)Application.Current).Host?.Services.GetService<IOptions<AppSettings>>();
+            var settings = this.GetService<IOptions<AppSettings>>();
             var launch = settings?.Value?.DefaultLaunch ?? "EditText";
             switch (launch)
             {
@@ -42,7 +42,7 @@ public sealed partial class FirstRunPage : Page
     }
 
     private IWritableOptions<AppSettings>? GetWritableSettings() =>
-        ((App)Application.Current).Host?.Services.GetService<IWritableOptions<AppSettings>>();
+        this.GetService<IWritableOptions<AppSettings>>();
 
     private void RadioButton_Checked(object sender, RoutedEventArgs e)
     {
@@ -83,7 +83,7 @@ public sealed partial class FirstRunPage : Page
             await ws.UpdateAsync(s => s with { FirstRun = false });
 
         // Navigate to Shell (sibling route, clear back stack)
-        var navigator = ((App)Application.Current).Host?.Services.GetRequiredService<INavigator>();
+        var navigator = this.GetService<INavigator>();
         if (navigator is not null)
             await navigator.NavigateRouteAsync(this, "Shell");
     }

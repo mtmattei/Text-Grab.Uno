@@ -59,12 +59,11 @@ public sealed partial class ShellPage : Page
     {
         ContentFrame.Navigated += ContentFrame_Navigated;
         // Wire notification host
-        var notificationService = ((App)Application.Current).Host?.Services
-            .GetService<InAppNotificationService>();
+        var notificationService = this.GetService<InAppNotificationService>();
         notificationService?.SetHost(NotificationHost);
 
         // Apply saved theme
-        var settings = ((App)Application.Current).Host?.Services.GetService<IOptions<AppSettings>>();
+        var settings = this.GetService<IOptions<AppSettings>>();
         var theme = settings?.Value?.AppTheme;
         if (this.XamlRoot is not null && theme is not null && theme != "System")
         {
@@ -101,8 +100,7 @@ public sealed partial class ShellPage : Page
         var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd);
         var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
 
-        var trayService = ((App)Application.Current).Host?.Services
-            .GetService<WindowsSystemTrayService>();
+        var trayService = this.GetService<WindowsSystemTrayService>();
         if (trayService is not null)
         {
             trayService.SetWindowHandle(hwnd);
@@ -118,7 +116,7 @@ public sealed partial class ShellPage : Page
         {
             appWindow.Closing += (s, args) =>
             {
-                var currentSettings = ((App)Application.Current).Host?.Services.GetService<IOptions<AppSettings>>();
+                var currentSettings = this.GetService<IOptions<AppSettings>>();
                 if (currentSettings?.Value?.RunInTheBackground == true)
                 {
                     args.Cancel = true;
@@ -154,8 +152,7 @@ public sealed partial class ShellPage : Page
 
         await dialog.ShowAsync();
 
-        var writableSettings = ((App)Application.Current).Host?.Services
-            .GetService<global::Uno.Extensions.Configuration.IWritableOptions<AppSettings>>();
+        var writableSettings = this.GetService<global::Uno.Extensions.Configuration.IWritableOptions<AppSettings>>();
         if (writableSettings is not null)
             await writableSettings.UpdateAsync(s => s with { FirstRun = false });
     }

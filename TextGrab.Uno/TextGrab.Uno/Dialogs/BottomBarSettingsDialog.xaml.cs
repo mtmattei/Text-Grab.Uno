@@ -18,7 +18,7 @@ public sealed partial class BottomBarSettingsDialog : ContentDialog
 
     private void LoadSettings()
     {
-        var settings = ((App)Application.Current).Host?.Services.GetService<IOptions<AppSettings>>();
+        var settings = this.GetService<IOptions<AppSettings>>();
         if (settings?.Value is null) return;
 
         ShowCursorTextToggle.IsOn = settings.Value.ShowCursorText;
@@ -83,8 +83,7 @@ public sealed partial class BottomBarSettingsDialog : ContentDialog
 
     private async void SaveButton_Click(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
-        var writableSettings = ((App)Application.Current).Host?.Services
-            .GetService<IWritableOptions<AppSettings>>();
+        var writableSettings = this.GetService<IWritableOptions<AppSettings>>();
         if (writableSettings is null) return;
 
         await writableSettings.UpdateAsync(s => s with

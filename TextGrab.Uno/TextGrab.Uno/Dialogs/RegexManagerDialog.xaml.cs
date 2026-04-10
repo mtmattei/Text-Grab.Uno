@@ -15,8 +15,7 @@ public sealed partial class RegexManagerDialog : ContentDialog
     public RegexManagerDialog()
     {
         this.InitializeComponent();
-        _settings = ((App)Application.Current).Host?.Services
-            .GetService<IWritableOptions<AppSettings>>();
+        _settings = this.GetService<IWritableOptions<AppSettings>>();
         LoadPatterns();
         PatternListView.ItemsSource = _patterns;
     }
@@ -24,7 +23,7 @@ public sealed partial class RegexManagerDialog : ContentDialog
     private void LoadPatterns()
     {
         _patterns.Clear();
-        var settings = ((App)Application.Current).Host?.Services.GetService<IOptions<AppSettings>>();
+        var settings = this.GetService<IOptions<AppSettings>>();
         var json = settings?.Value?.RegexList;
 
         if (!string.IsNullOrWhiteSpace(json))

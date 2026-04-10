@@ -15,7 +15,6 @@ public class LanguageService : ILanguageService
     private IList<ILanguage>? _cachedAllLanguages;
     private ILanguage? _cachedCurrentInputLanguage;
     private string? _cachedCurrentInputLanguageTag;
-    private string? _cachedSystemLanguageForTranslation;
     private string? _cachedLastUsedLang;
     private ILanguage? _cachedOcrLanguage;
     private readonly object _cacheLock = new();
@@ -53,10 +52,12 @@ public class LanguageService : ILanguageService
         {
             if (_cachedAllLanguages is not null)
                 return _cachedAllLanguages;
+        }
 
-            List<ILanguage> languages = [];
-
-            // Aggregate languages from all registered engines
+        // Run async language discovery off the UI thread to avoid deadlock
+        var languages = Task.Run(async () =>
+        {
+            List<ILanguage> langs = [];
             foreach (IOcrEngine engine in _engines)
             {
                 if (!engine.IsAvailable)
@@ -64,12 +65,11 @@ public class LanguageService : ILanguageService
 
                 try
                 {
-                    var engineLangs = engine.GetAvailableLanguagesAsync().GetAwaiter().GetResult();
+                    var engineLangs = await engine.GetAvailableLanguagesAsync().ConfigureAwait(false);
                     foreach (var lang in engineLangs)
                     {
-                        // Avoid duplicates by tag
-                        if (!languages.Any(l => l.LanguageTag == lang.LanguageTag))
-                            languages.Add(lang);
+                        if (!langs.Any(l => l.LanguageTag == lang.LanguageTag))
+                            langs.Add(lang);
                     }
                 }
                 catch (Exception ex)
@@ -77,8 +77,12 @@ public class LanguageService : ILanguageService
                     Debug.WriteLine($"Failed to get languages from {engine.Name}: {ex.Message}");
                 }
             }
+            return langs;
+        }).GetAwaiter().GetResult();
 
-            _cachedAllLanguages = languages;
+        lock (_cacheLock)
+        {
+            _cachedAllLanguages ??= languages;
             return _cachedAllLanguages;
         }
     }
@@ -142,85 +146,4 @@ public class LanguageService : ILanguageService
         }
     }
 
-    public string GetSystemLanguageForTranslation()
-    {
-        string currentTag = CultureInfo.CurrentCulture.Name;
-
-        lock (_cacheLock)
-        {
-            if (_cachedSystemLanguageForTranslation is not null &&
-                _cachedCurrentInputLanguageTag == currentTag)
-            {
-                return _cachedSystemLanguageForTranslation;
-            }
-
-            try
-            {
-                ILanguage currentLang = GetCurrentInputLanguage();
-                string displayName = currentLang.DisplayName;
-
-                if (displayName.Contains('('))
-                    displayName = displayName[..displayName.IndexOf('(')].Trim();
-
-                string languageTag = currentLang.LanguageTag.ToLowerInvariant();
-                _cachedSystemLanguageForTranslation = languageTag switch
-                {
-                    var t when t.StartsWith("en") => "English",
-                    var t when t.StartsWith("es") => "Spanish",
-                    var t when t.StartsWith("fr") => "French",
-                    var t when t.StartsWith("de") => "German",
-                    var t when t.StartsWith("it") => "Italian",
-                    var t when t.StartsWith("pt") => "Portuguese",
-                    var t when t.StartsWith("ru") => "Russian",
-                    var t when t.StartsWith("ja") => "Japanese",
-                    var t when t.StartsWith("zh") => "Chinese",
-                    var t when t.StartsWith("ko") => "Korean",
-                    var t when t.StartsWith("ar") => "Arabic",
-                    var t when t.StartsWith("hi") => "Hindi",
-                    _ => displayName
-                };
-
-                return _cachedSystemLanguageForTranslation;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Failed to get system language: {ex.Message}");
-                _cachedSystemLanguageForTranslation = "English";
-                return _cachedSystemLanguageForTranslation;
-            }
-        }
-    }
-
-    public bool IsCurrentLanguageLatinBased() => GetCurrentInputLanguage().IsLatinBased();
-
-    public void InvalidateLanguagesCache()
-    {
-        lock (_cacheLock)
-        {
-            _cachedAllLanguages = null;
-            _cachedOcrLanguage = null;
-        }
-    }
-
-    public void InvalidateOcrLanguageCache()
-    {
-        lock (_cacheLock)
-        {
-            _cachedOcrLanguage = null;
-            _cachedLastUsedLang = null;
-        }
-    }
-
-    public void InvalidateAllCaches()
-    {
-        lock (_cacheLock)
-        {
-            _cachedAllLanguages = null;
-            _cachedCurrentInputLanguage = null;
-            _cachedCurrentInputLanguageTag = null;
-            _cachedSystemLanguageForTranslation = null;
-            _cachedLastUsedLang = null;
-            _cachedOcrLanguage = null;
-        }
-    }
 }

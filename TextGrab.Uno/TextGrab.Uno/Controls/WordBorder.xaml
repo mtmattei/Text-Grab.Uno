@@ -9,7 +9,7 @@
   <Grid>
     <!-- Main word display/edit border -->
     <Border x:Name="WordBorderBorder"
-            BorderBrush="#308E98"
+            BorderBrush="{ThemeResource PrimaryBrush}"
             BorderThickness="0,0,0,2"
             CornerRadius="0">
       <Border.ContextFlyout>
@@ -50,7 +50,7 @@
     <!-- Move/Resize overlay (shown on Ctrl+hover) -->
     <Border x:Name="MoveResizeBorder"
             Background="Transparent"
-            BorderBrush="#308E98"
+            BorderBrush="{ThemeResource PrimaryBrush}"
             BorderThickness="2"
             CornerRadius="2"
             Visibility="Collapsed">
@@ -59,22 +59,22 @@
         <!-- Left resize handle -->
         <Border Width="6" Height="12" Margin="-4"
                 HorizontalAlignment="Left" VerticalAlignment="Center"
-                Background="#18474C" CornerRadius="1"
+                Background="{ThemeResource PrimaryContainerBrush}" CornerRadius="1"
                 PointerPressed="SizeHandle_PointerPressed" Tag="Left" />
         <!-- Top resize handle -->
         <Border Width="20" Height="6" Margin="-4"
                 HorizontalAlignment="Center" VerticalAlignment="Top"
-                Background="#18474C" CornerRadius="1"
+                Background="{ThemeResource PrimaryContainerBrush}" CornerRadius="1"
                 PointerPressed="SizeHandle_PointerPressed" Tag="Top" />
         <!-- Right resize handle -->
         <Border Width="6" Height="12" Margin="-4"
                 HorizontalAlignment="Right" VerticalAlignment="Center"
-                Background="#18474C" CornerRadius="1"
+                Background="{ThemeResource PrimaryContainerBrush}" CornerRadius="1"
                 PointerPressed="SizeHandle_PointerPressed" Tag="Right" />
         <!-- Bottom resize handle -->
         <Border Width="20" Height="6" Margin="-4"
                 HorizontalAlignment="Center" VerticalAlignment="Bottom"
-                Background="#18474C" CornerRadius="1"
+                Background="{ThemeResource PrimaryContainerBrush}" CornerRadius="1"
                 PointerPressed="SizeHandle_PointerPressed" Tag="Bottom" />
       </Grid>
     </Border>

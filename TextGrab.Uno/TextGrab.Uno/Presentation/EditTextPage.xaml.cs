@@ -14,11 +14,21 @@ public sealed partial class EditTextPage : Page
     {
         this.InitializeComponent();
         Loaded += OnLoaded;
+        Unloaded += OnUnloaded;
+    }
+
+    private void OnUnloaded(object sender, RoutedEventArgs e)
+    {
+        if (_isWatchingClipboard)
+        {
+            Clipboard.ContentChanged -= Clipboard_ContentChanged;
+            _isWatchingClipboard = false;
+        }
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        _fileService = this.FindServiceProvider()?.GetService(typeof(IFileService)) as IFileService;
+        _fileService = this.GetService<IFileService>();
         LoadRecentFiles();
 
         // Receive text passed from FullscreenGrab or GrabFrame
@@ -32,7 +42,7 @@ public sealed partial class EditTextPage : Page
         }
     }
 
-    private INavigator? Navigator => this.FindServiceProvider()?.GetService(typeof(INavigator)) as INavigator;
+    private INavigator? Navigator => this.GetService<INavigator>();
 
     // --- Status bar updates ---
 
@@ -389,7 +399,7 @@ public sealed partial class EditTextPage : Page
             : "";
         if (string.IsNullOrWhiteSpace(selected)) return;
 
-        var settings = ((App)Application.Current).Host?.Services.GetService<IOptions<AppSettings>>();
+        var settings = this.GetService<IOptions<AppSettings>>();
         string url = settings?.Value?.WebSearchUrl ?? "https://www.google.com/search?q=";
         await Windows.System.Launcher.LaunchUriAsync(new Uri(url + Uri.EscapeDataString(selected)));
     }
@@ -579,7 +589,7 @@ public sealed partial class EditTextPage : Page
     private void LoadRecentFiles()
     {
         RecentFilesMenu.Items.Clear();
-        var settings = ((App)Application.Current).Host?.Services.GetService<IOptions<AppSettings>>();
+        var settings = this.GetService<IOptions<AppSettings>>();
         var json = settings?.Value?.RecentFiles;
         if (string.IsNullOrWhiteSpace(json)) return;
 
@@ -620,7 +630,7 @@ public sealed partial class EditTextPage : Page
     {
         if (string.IsNullOrEmpty(path)) return;
 
-        var settings = ((App)Application.Current).Host?.Services.GetService<IOptions<AppSettings>>();
+        var settings = this.GetService<IOptions<AppSettings>>();
         var json = settings?.Value?.RecentFiles;
         var files = new List<string>();
 
@@ -634,8 +644,7 @@ public sealed partial class EditTextPage : Page
         files.Insert(0, path);
         if (files.Count > 10) files.RemoveRange(10, files.Count - 10);
 
-        var writableSettings = ((App)Application.Current).Host?.Services
-            .GetService<global::Uno.Extensions.Configuration.IWritableOptions<AppSettings>>();
+        var writableSettings = this.GetService<global::Uno.Extensions.Configuration.IWritableOptions<AppSettings>>();
         if (writableSettings is not null)
             await writableSettings.UpdateAsync(s => s with { RecentFiles = System.Text.Json.JsonSerializer.Serialize(files) });
 
@@ -679,7 +688,7 @@ public sealed partial class EditTextPage : Page
 
     private async void OcrPaste_Click(object sender, RoutedEventArgs e)
     {
-        var ocrService = this.FindServiceProvider()?.GetService(typeof(IOcrService)) as IOcrService;
+        var ocrService = this.GetService<IOcrService>();
         if (ocrService is null) return;
 
         if (!ClipboardHelper.HasBitmap())
@@ -715,8 +724,8 @@ public sealed partial class EditTextPage : Page
 
     private async void OcrFromImage_Click(object sender, RoutedEventArgs e)
     {
-        var ocrService = this.FindServiceProvider()?.GetService(typeof(IOcrService)) as IOcrService;
-        var fileService = this.FindServiceProvider()?.GetService(typeof(IFileService)) as IFileService;
+        var ocrService = this.GetService<IOcrService>();
+        var fileService = this.GetService<IFileService>();
         if (ocrService is null || fileService is null) return;
 
         StatusBarText.Text = "Picking image...";
@@ -739,9 +748,7 @@ public sealed partial class EditTextPage : Page
             return;
         }
 
-        string ocrText = !string.IsNullOrWhiteSpace(result.CleanedOutput)
-            ? result.CleanedOutput
-            : result.RawOutput;
+        string ocrText = result.GetBestText();
 
         if (string.IsNullOrEmpty(PassedTextControl.Text))
             PassedTextControl.Text = ocrText;
@@ -753,7 +760,7 @@ public sealed partial class EditTextPage : Page
 
     private async void OcrFromClipboard_Click(object sender, RoutedEventArgs e)
     {
-        var ocrService = this.FindServiceProvider()?.GetService(typeof(IOcrService)) as IOcrService;
+        var ocrService = this.GetService<IOcrService>();
         if (ocrService is null) return;
 
         StatusBarText.Text = "Reading clipboard image...";
@@ -781,9 +788,7 @@ public sealed partial class EditTextPage : Page
                 return;
             }
 
-            string ocrText = !string.IsNullOrWhiteSpace(result.CleanedOutput)
-                ? result.CleanedOutput
-                : result.RawOutput;
+            string ocrText = result.GetBestText();
 
             if (string.IsNullOrEmpty(PassedTextControl.Text))
                 PassedTextControl.Text = ocrText;

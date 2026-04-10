@@ -17,16 +17,16 @@
 
     <!-- Semi-transparent overlay Canvas for region selection -->
     <Canvas x:Name="SelectionCanvas"
-            Background="#60000000"
+            Background="{StaticResource ShadeOverlayBrush}"
             PointerPressed="Canvas_PointerPressed"
             PointerMoved="Canvas_PointerMoved"
             PointerReleased="Canvas_PointerReleased">
 
       <!-- Selection rectangle -->
       <Border x:Name="SelectionBorder"
-              BorderBrush="#308E98"
+              BorderBrush="{ThemeResource PrimaryBrush}"
               BorderThickness="2"
-              Background="#20FFFFFF"
+              Background="{StaticResource SelectionOverlayBrush}"
               Visibility="Collapsed" />
 
       <Canvas.ContextFlyout>
@@ -49,7 +49,7 @@
             Margin="0,12,0,0"
             Padding="12,6"
             CornerRadius="8"
-            Background="#E0202020"
+            Background="{StaticResource ToolbarBackgroundBrush}"
             ManipulationMode="TranslateX,TranslateY"
             Translation="0,0,32">
       <Border.RenderTransform>
@@ -61,7 +61,7 @@
       <StackPanel Orientation="Horizontal" Spacing="8">
         <FontIcon Glyph="&#xE76F;"
                   FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                  Foreground="#80FFFFFF"
+                  Foreground="{StaticResource ToolbarHintBrush}"
                   FontSize="14"
                   VerticalAlignment="Center"
                   Margin="0,0,4,0"
@@ -71,7 +71,7 @@
                   MinWidth="150"
                   PlaceholderText="Language" />
 
-        <Border Width="1" Background="#40FFFFFF" Margin="4,2" />
+        <Border Width="1" Background="{StaticResource ToolbarSeparatorBrush}" Margin="4,2" />
 
         <RadioButton x:Name="NormalModeRadio" Content="Standard" IsChecked="True"
                      GroupName="GrabMode" Foreground="White" MinWidth="0" Padding="4,0" />
@@ -80,7 +80,7 @@
         <RadioButton x:Name="TableModeRadio" Content="Table"
                      GroupName="GrabMode" Foreground="White" MinWidth="0" Padding="4,0" />
 
-        <Border Width="1" Background="#40FFFFFF" Margin="4,2" />
+        <Border Width="1" Background="{StaticResource ToolbarSeparatorBrush}" Margin="4,2" />
 
         <ToggleButton x:Name="FreezeToggle" Content="&#xE786;"
                       FontFamily="{ThemeResource SymbolThemeFontFamily}"
@@ -107,7 +107,7 @@
             Margin="0,0,0,12"
             Padding="16,8"
             CornerRadius="8"
-            Background="#E0202020">
+            Background="{StaticResource ToolbarBackgroundBrush}">
       <StackPanel Orientation="Horizontal" Spacing="12">
         <TextBlock x:Name="StatusText"
                    Text="Draw a rectangle to capture text, or press Esc to cancel"

@@ -13,7 +13,7 @@ public sealed partial class Shell : UserControl, IContentControlProvider
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         // Apply saved theme on startup
-        var settings = ((App)Application.Current).Host?.Services.GetService<IOptions<AppSettings>>();
+        var settings = this.GetService<IOptions<AppSettings>>();
         var theme = settings?.Value?.AppTheme ?? "System";
 
         if (this.XamlRoot is not null && theme != "System")

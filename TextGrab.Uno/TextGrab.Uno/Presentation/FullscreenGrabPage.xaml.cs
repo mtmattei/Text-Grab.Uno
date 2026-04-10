@@ -29,8 +29,8 @@ public sealed partial class FullscreenGrabPage : Page
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
-        _ocrService = GetService<IOcrService>();
-        _captureService = GetService<IScreenCaptureService>();
+        _ocrService = this.GetService<IOcrService>();
+        _captureService = this.GetService<IScreenCaptureService>();
 
         // Maximize the window for fullscreen overlay effect
 #if WINDOWS
@@ -38,7 +38,7 @@ public sealed partial class FullscreenGrabPage : Page
 #endif
 
         // Load languages
-        var langService = GetService<ILanguageService>();
+        var langService = this.GetService<ILanguageService>();
         if (langService is not null)
         {
             foreach (var lang in langService.GetAllLanguages())
@@ -65,19 +65,11 @@ public sealed partial class FullscreenGrabPage : Page
 
             if (capturedStream is not null)
             {
-                // Store raw bytes so they survive BitmapImage consuming the stream
-                using var ms = new MemoryStream();
-                await capturedStream.CopyToAsync(ms);
-                _capturedScreenBytes = ms.ToArray();
-
-                var bitmapImage = new BitmapImage();
-                using var displayStream = new MemoryStream(_capturedScreenBytes);
-                await bitmapImage.SetSourceAsync(displayStream.AsRandomAccessStream());
-                BackgroundImage.Source = bitmapImage;
+                await StoreAndDisplayScreenshotAsync(capturedStream);
                 StatusText.Text = "Draw a rectangle to capture text, or press Esc to cancel";
 
                 // Apply shade overlay from settings
-                var settings = GetService<IOptions<AppSettings>>();
+                var settings = this.GetService<IOptions<AppSettings>>();
                 if (settings?.Value?.FsgShadeOverlay == false)
                     SelectionCanvas.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
                         Microsoft.UI.Colors.Transparent);
@@ -100,7 +92,7 @@ public sealed partial class FullscreenGrabPage : Page
 #endif
 
         // Apply default mode from settings
-        var appSettings = GetService<IOptions<AppSettings>>();
+        var appSettings = this.GetService<IOptions<AppSettings>>();
         if (appSettings?.Value is not null)
         {
             SendToEtwToggle.IsChecked = appSettings.Value.FsgSendEtwToggle;
@@ -124,6 +116,7 @@ public sealed partial class FullscreenGrabPage : Page
 #if WINDOWS
         RestoreWindow();
 #endif
+        FloatingToolbar.ManipulationDelta -= FloatingToolbar_ManipulationDelta;
         _capturedScreenBytes = null;
     }
 
@@ -168,6 +161,20 @@ public sealed partial class FullscreenGrabPage : Page
     [System.Runtime.InteropServices.DllImport("user32.dll")]
     private static extern bool ShowWindow(nint hWnd, int nCmdShow);
 #endif
+
+    // --- Screenshot capture helper ---
+
+    private async Task StoreAndDisplayScreenshotAsync(Stream capturedStream)
+    {
+        using var ms = new MemoryStream();
+        await capturedStream.CopyToAsync(ms);
+        _capturedScreenBytes = ms.ToArray();
+
+        var bitmapImage = new BitmapImage();
+        using var displayStream = new MemoryStream(_capturedScreenBytes);
+        await bitmapImage.SetSourceAsync(displayStream.AsRandomAccessStream());
+        BackgroundImage.Source = bitmapImage;
+    }
 
     // --- Toolbar drag ---
 
@@ -230,23 +237,15 @@ public sealed partial class FullscreenGrabPage : Page
 
             if (capturedStream is not null)
             {
-                using var ms = new MemoryStream();
-                await capturedStream.CopyToAsync(ms);
-                _capturedScreenBytes = ms.ToArray();
-
-                var bitmapImage = new BitmapImage();
-                using var displayStream = new MemoryStream(_capturedScreenBytes);
-                await bitmapImage.SetSourceAsync(displayStream.AsRandomAccessStream());
-                BackgroundImage.Source = bitmapImage;
+                await StoreAndDisplayScreenshotAsync(capturedStream);
             }
         }
         else
         {
             // Restore shade overlay
-            var settings = GetService<IOptions<AppSettings>>();
+            var settings = this.GetService<IOptions<AppSettings>>();
             if (settings?.Value?.FsgShadeOverlay != false)
-                SelectionCanvas.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                    Windows.UI.Color.FromArgb(0x60, 0, 0, 0));
+                SelectionCanvas.Background = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["ShadeOverlayBrush"];
 
             StatusText.Text = "Draw a rectangle to capture text, or press Esc to cancel";
         }
@@ -372,7 +371,7 @@ public sealed partial class FullscreenGrabPage : Page
         w = Math.Clamp(w, 1, skBitmap.Width - x);
         h = Math.Clamp(h, 1, skBitmap.Height - y);
 
-        var subset = new SKBitmap();
+        using var subset = new SKBitmap();
         if (!skBitmap.ExtractSubset(subset, new SKRectI(x, y, x + w, y + h)))
             return null;
 
@@ -381,8 +380,6 @@ public sealed partial class FullscreenGrabPage : Page
         using var data = image.Encode(SKEncodedImageFormat.Png, 100);
         data.SaveTo(stream);
         stream.Position = 0;
-
-        subset.Dispose();
         return stream;
     }
 
@@ -412,18 +409,16 @@ public sealed partial class FullscreenGrabPage : Page
                 return;
             }
 
-            string text = !string.IsNullOrWhiteSpace(result.CleanedOutput)
-                ? result.CleanedOutput
-                : result.RawOutput;
+            string text = result.GetBestText();
 
             // Try barcode detection if enabled
-            var settings = GetService<IOptions<AppSettings>>();
+            var settings = this.GetService<IOptions<AppSettings>>();
             if (settings?.Value?.ReadBarcodesOnGrab == true && imageStream.CanSeek)
             {
                 imageStream.Position = 0;
                 using var barcodeMs = new MemoryStream();
                 await imageStream.CopyToAsync(barcodeMs);
-                var barcodeService = GetService<IBarcodeService>();
+                var barcodeService = this.GetService<IBarcodeService>();
                 if (barcodeService is not null)
                 {
                     var barcodeText = await barcodeService.ReadBarcodeFromImageAsync(barcodeMs.ToArray());
@@ -519,7 +514,7 @@ public sealed partial class FullscreenGrabPage : Page
     {
         ClipboardHelper.CopyText(text);
 
-        var notificationService = GetService<INotificationService>();
+        var notificationService = this.GetService<INotificationService>();
         notificationService?.ShowSuccess($"Copied: {(text.Length > 60 ? text[..60] + "..." : text)}");
 
         StatusText.Text = $"Copied {text.Length} chars ({engine})";
@@ -538,7 +533,7 @@ public sealed partial class FullscreenGrabPage : Page
 
     private async void OcrFromFile_Click(object sender, RoutedEventArgs e)
     {
-        var fileService = GetService<IFileService>();
+        var fileService = this.GetService<IFileService>();
         if (fileService is null || _ocrService is null) return;
 
         var imageData = await fileService.PickImageFileAsync();
@@ -619,6 +614,4 @@ public sealed partial class FullscreenGrabPage : Page
         this.Frame?.Navigate(typeof(SettingsPage));
     }
 
-    private T? GetService<T>() where T : class
-        => ((App)Application.Current).Host?.Services.GetService<T>();
 }

@@ -54,7 +54,7 @@
         <Button Content="&#xE710;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
                 ToolTipService.ToolTip="Add New Row"
                 Click="AddRow_Click" />
-        <Border Width="1" Background="#40808080" Margin="2,4" />
+        <Border Width="1" Background="{StaticResource ToolbarSeparatorBrush}" Margin="2,4" />
         <ToggleButton x:Name="InsertOnCopyToggle"
                       Content="&#xE77F;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
                       ToolTipService.ToolTip="Insert value when copied (Ctrl+I)"

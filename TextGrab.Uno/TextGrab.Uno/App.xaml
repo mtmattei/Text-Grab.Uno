@@ -21,7 +21,12 @@
         </utum:MaterialToolkitTheme>
       </ResourceDictionary.MergedDictionaries>
 
-      <!-- Add resources here -->
+      <!-- App-level overlay brushes (derived from theme colors, with alpha) -->
+      <SolidColorBrush x:Key="ShadeOverlayBrush" Color="Black" Opacity="0.38" />
+      <SolidColorBrush x:Key="SelectionOverlayBrush" Color="{ThemeResource PrimaryColor}" Opacity="0.12" />
+      <SolidColorBrush x:Key="ToolbarBackgroundBrush" Color="{ThemeResource OnSurfaceColor}" Opacity="0.88" />
+      <SolidColorBrush x:Key="ToolbarSeparatorBrush" Color="{ThemeResource OnSurfaceColor}" Opacity="0.25" />
+      <SolidColorBrush x:Key="ToolbarHintBrush" Color="{ThemeResource OnSurfaceColor}" Opacity="0.50" />
 
     </ResourceDictionary>
   </Application.Resources>

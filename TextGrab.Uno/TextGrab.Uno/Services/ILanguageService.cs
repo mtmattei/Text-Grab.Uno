@@ -9,9 +9,4 @@ public interface ILanguageService
     ILanguage GetCurrentInputLanguage();
     IList<ILanguage> GetAllLanguages();
     ILanguage GetOcrLanguage();
-    string GetSystemLanguageForTranslation();
-    bool IsCurrentLanguageLatinBased();
-    void InvalidateLanguagesCache();
-    void InvalidateOcrLanguageCache();
-    void InvalidateAllCaches();
 }

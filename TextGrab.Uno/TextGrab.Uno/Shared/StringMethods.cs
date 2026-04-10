@@ -100,17 +100,6 @@ public static partial class StringMethods
         }
     }
 
-    public static IEnumerable<int> FindAllIndicesOfString(this string sourceString, string stringToFind)
-    {
-        int stepsToSearch = 1 + sourceString.Length - stringToFind.Length;
-
-        for (int i = 0; i < stepsToSearch; i++)
-        {
-            if (sourceString.Substring(i, stringToFind.Length) == stringToFind)
-                yield return i;
-        }
-    }
-
     public static (int, int) CursorWordBoundaries(this string input, int cursorPosition)
     {
         if (string.IsNullOrEmpty(input))
@@ -146,19 +135,6 @@ public static partial class StringMethods
         return (start, end - start);
     }
 
-
-    public static string GetWordAtCursorPosition(this string input, int cursorPosition)
-    {
-        if (input.Length == 0)
-            return string.Empty;
-
-        cursorPosition = Math.Clamp(cursorPosition, 0, input.Length - 1);
-
-        (int start, int length) = input.CursorWordBoundaries(cursorPosition);
-
-        // Return the substring of the input that represents the word.
-        return input.Substring(start, length);
-    }
 
     private static int FindNearestLetterIndex(string input, int cursorPosition)
     {

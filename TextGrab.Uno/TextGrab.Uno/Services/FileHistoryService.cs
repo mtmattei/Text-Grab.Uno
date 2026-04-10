@@ -76,13 +76,6 @@ public class FileHistoryService : IHistoryService
         await WriteHistoryAsync(ct);
     }
 
-    public async Task RemoveHistoryItemAsync(HistoryInfo item, CancellationToken ct = default)
-    {
-        _textHistory.Remove(item);
-        _imageHistory.Remove(item);
-        await WriteHistoryAsync(ct);
-    }
-
     public Task DeleteAllHistoryAsync(CancellationToken ct = default)
     {
         _textHistory.Clear();

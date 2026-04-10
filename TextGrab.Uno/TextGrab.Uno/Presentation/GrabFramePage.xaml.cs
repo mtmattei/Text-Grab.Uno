@@ -108,7 +108,7 @@ public sealed partial class GrabFramePage : Page, IGrabFrameHost
 
     private async void OpenImage_Click(object sender, RoutedEventArgs e)
     {
-        var fileService = GetService<IFileService>();
+        var fileService = this.GetService<IFileService>();
         if (fileService is null) return;
 
         var data = await fileService.PickImageFileAsync();
@@ -203,7 +203,7 @@ public sealed partial class GrabFramePage : Page, IGrabFrameHost
 
     private void PopulateLanguages()
     {
-        var langService = GetService<ILanguageService>();
+        var langService = this.GetService<ILanguageService>();
         if (langService is null) return;
 
         var languages = langService.GetAllLanguages();
@@ -230,7 +230,7 @@ public sealed partial class GrabFramePage : Page, IGrabFrameHost
         if (_currentImageData is null || _currentImageData.Length == 0)
             return;
 
-        var ocrService = GetService<IOcrService>();
+        var ocrService = this.GetService<IOcrService>();
         if (ocrService is null) return;
 
         StatusBarText.Text = "Running OCR...";
@@ -251,10 +251,10 @@ public sealed partial class GrabFramePage : Page, IGrabFrameHost
         CreateWordBordersFromOcr(_ocrResult);
 
         // Try barcode detection if enabled
-        var settings = GetService<IOptions<AppSettings>>();
+        var settings = this.GetService<IOptions<AppSettings>>();
         if (settings?.Value?.ReadBarcodesOnGrab == true)
         {
-            var barcodeService = GetService<IBarcodeService>();
+            var barcodeService = this.GetService<IBarcodeService>();
             if (barcodeService is not null)
             {
                 var barcodeText = await barcodeService.ReadBarcodeFromImageAsync(_currentImageData);
@@ -549,7 +549,7 @@ public sealed partial class GrabFramePage : Page, IGrabFrameHost
 
         ClipboardHelper.CopyText(text);
 
-        var navigator = GetService<INavigator>();
+        var navigator = this.GetService<INavigator>();
         if (navigator is not null)
             _ = navigator.NavigateRouteAsync(this, "EditText");
     }
@@ -842,6 +842,4 @@ public sealed partial class GrabFramePage : Page, IGrabFrameHost
         StatusBarText.Text = "Text Grab v5.0 — Grab Frame";
     }
 
-    private T? GetService<T>() where T : class
-        => this.FindServiceProvider()?.GetService(typeof(T)) as T;
 }

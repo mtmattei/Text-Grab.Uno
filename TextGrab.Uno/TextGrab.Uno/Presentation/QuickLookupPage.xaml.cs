@@ -23,7 +23,7 @@ public sealed partial class QuickLookupPage : Page
 
     private async void OpenCSV_Click(object sender, RoutedEventArgs e)
     {
-        var fileService = GetService<IFileService>();
+        var fileService = this.GetService<IFileService>();
         if (fileService is null) return;
 
         var content = await fileService.PickAndReadTextFileAsync();
@@ -69,7 +69,7 @@ public sealed partial class QuickLookupPage : Page
 
     private async void SaveCSV_Click(object sender, RoutedEventArgs e)
     {
-        var fileService = GetService<IFileService>();
+        var fileService = this.GetService<IFileService>();
         if (fileService is null) return;
 
         var sb = new StringBuilder();
@@ -200,7 +200,7 @@ public sealed partial class QuickLookupPage : Page
         // Navigate to EditText if toggle is on
         if (SendToEtwToggle.IsChecked == true)
         {
-            var navigator = ((App)Application.Current).Host?.Services.GetService<INavigator>();
+            var navigator = this.GetService<INavigator>();
             if (navigator is not null)
                 _ = navigator.NavigateRouteAsync(this, "EditText");
         }
@@ -334,6 +334,4 @@ public sealed partial class QuickLookupPage : Page
         ClipboardHelper.CopyText(text);
     }
 
-    private T? GetService<T>() where T : class
-        => this.FindServiceProvider()?.GetService(typeof(T)) as T;
 }

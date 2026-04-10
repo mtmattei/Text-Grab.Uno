@@ -36,22 +36,20 @@ public sealed partial class DangerSettingsPage : Page
 
     private async void ExportBugReportButton_Click(object sender, RoutedEventArgs e)
     {
-        var settings = ((App)Application.Current).Host?.Services.GetService<IOptions<AppSettings>>();
+        var settings = this.GetService<IOptions<AppSettings>>();
         var info = $"Text Grab Uno v5.0\n" +
                    $"Date: {DateTime.Now}\n" +
                    $"OS: {System.Runtime.InteropServices.RuntimeInformation.OSDescription}\n" +
                    $"Arch: {System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture}\n" +
                    $"Settings: {System.Text.Json.JsonSerializer.Serialize(settings?.Value)}";
 
-        var dp = new Windows.ApplicationModel.DataTransfer.DataPackage();
-        dp.SetText(info);
-        Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(dp);
+        ClipboardHelper.CopyText(info);
         await ShowStatusAsync("Bug report copied to clipboard.");
     }
 
     private async void ExportSettingsButton_Click(object sender, RoutedEventArgs e)
     {
-        var settings = ((App)Application.Current).Host?.Services.GetService<IOptions<AppSettings>>();
+        var settings = this.GetService<IOptions<AppSettings>>();
         if (settings?.Value is null) return;
 
         var json = System.Text.Json.JsonSerializer.Serialize(settings.Value,
@@ -95,8 +93,7 @@ public sealed partial class DangerSettingsPage : Page
             return;
         }
 
-        var writableSettings = ((App)Application.Current).Host?.Services
-            .GetService<global::Uno.Extensions.Configuration.IWritableOptions<AppSettings>>();
+        var writableSettings = this.GetService<global::Uno.Extensions.Configuration.IWritableOptions<AppSettings>>();
         if (writableSettings is not null)
         {
             await writableSettings.UpdateAsync(_ => imported);

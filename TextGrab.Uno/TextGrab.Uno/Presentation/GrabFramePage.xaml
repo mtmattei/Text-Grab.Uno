@@ -115,7 +115,7 @@
             <Border x:Name="SelectBorder"
                     BorderBrush="{ThemeResource SystemAccentColor}"
                     BorderThickness="2"
-                    Background="#20308E98"
+                    Background="{StaticResource SelectionOverlayBrush}"
                     Visibility="Collapsed" />
           </Canvas>
         </Grid>

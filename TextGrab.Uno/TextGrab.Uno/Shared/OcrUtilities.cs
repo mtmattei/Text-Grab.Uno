@@ -102,10 +102,7 @@ public static partial class OcrUtilities
         {
             output.CleanOutput(correctToLatin, correctErrors);
 
-            if (!string.IsNullOrWhiteSpace(output.CleanedOutput))
-                text.Append(output.CleanedOutput);
-            else if (!string.IsNullOrWhiteSpace(output.RawOutput))
-                text.Append(output.RawOutput);
+            text.Append(output.GetBestText());
         }
 
         return text.ToString();
