@@ -22,7 +22,7 @@ public static class ImagePreprocessor
         using SKBitmap working = (scaleFactor != 1.0 && scaleFactor > 0)
             ? original.Resize(new SKImageInfo(
                 (int)(original.Width * scaleFactor),
-                (int)(original.Height * scaleFactor)), SKFilterQuality.High)
+                (int)(original.Height * scaleFactor)), new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear))
             : original.Copy();
 
         // Apply grayscale

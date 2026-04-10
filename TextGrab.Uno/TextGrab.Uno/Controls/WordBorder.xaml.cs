@@ -190,9 +190,7 @@ public sealed partial class WordBorder : UserControl, INotifyPropertyChanged
 
     private void CopyWordMenuItem_Click(object sender, RoutedEventArgs e)
     {
-        var dp = new DataPackage();
-        dp.SetText(Word);
-        Clipboard.SetContent(dp);
+        ClipboardHelper.CopyText(Word);
     }
 
     private void TryToNumberMenuItem_Click(object sender, RoutedEventArgs e)

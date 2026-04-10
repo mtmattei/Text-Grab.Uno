@@ -15,6 +15,11 @@
             <SymbolIcon Symbol="Edit" />
           </NavigationViewItem.Icon>
         </NavigationViewItem>
+        <NavigationViewItem Content="Fullscreen Grab" Tag="FullscreenGrab">
+          <NavigationViewItem.Icon>
+            <FontIcon Glyph="&#xE7A0;" />
+          </NavigationViewItem.Icon>
+        </NavigationViewItem>
         <NavigationViewItem Content="Grab Frame" Tag="GrabFrame">
           <NavigationViewItem.Icon>
             <FontIcon Glyph="&#xE8B7;" />

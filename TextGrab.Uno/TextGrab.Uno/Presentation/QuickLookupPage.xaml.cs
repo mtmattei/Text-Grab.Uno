@@ -194,9 +194,7 @@ public sealed partial class QuickLookupPage : Page
                 sb.Append(item.LongValue);
         }
 
-        var dp = new DataPackage();
-        dp.SetText(sb.ToString());
-        Clipboard.SetContent(dp);
+        ClipboardHelper.CopyText(sb.ToString());
         StatusBarText.Text = $"Copied {selected.Count} item{(selected.Count != 1 ? "s" : "")}";
 
         // Navigate to EditText if toggle is on
@@ -333,9 +331,7 @@ public sealed partial class QuickLookupPage : Page
 
     private static void CopyToClipboard(string text)
     {
-        var dp = new DataPackage();
-        dp.SetText(text);
-        Clipboard.SetContent(dp);
+        ClipboardHelper.CopyText(text);
     }
 
     private T? GetService<T>() where T : class

@@ -22,7 +22,8 @@ public class OcrService : IOcrService
         _settings = settings;
     }
 
-    public IReadOnlyList<IOcrEngine> Engines => _engines.ToList().AsReadOnly();
+    private IReadOnlyList<IOcrEngine>? _cachedEngines;
+    public IReadOnlyList<IOcrEngine> Engines => _cachedEngines ??= _engines.ToList().AsReadOnly();
 
     public async Task<OcrOutput?> RecognizeAsync(Stream imageStream, ILanguage? language = null, CancellationToken ct = default)
     {

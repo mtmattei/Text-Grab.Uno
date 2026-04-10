@@ -20,6 +20,16 @@ public sealed partial class EditTextPage : Page
     {
         _fileService = this.FindServiceProvider()?.GetService(typeof(IFileService)) as IFileService;
         LoadRecentFiles();
+
+        // Receive text passed from FullscreenGrab or GrabFrame
+        if (FullscreenGrabPage.PendingTextForEditText is { } pendingText)
+        {
+            FullscreenGrabPage.PendingTextForEditText = null;
+            if (string.IsNullOrEmpty(PassedTextControl.Text))
+                PassedTextControl.Text = pendingText;
+            else
+                PassedTextControl.Text += Environment.NewLine + pendingText;
+        }
     }
 
     private INavigator? Navigator => this.FindServiceProvider()?.GetService(typeof(INavigator)) as INavigator;
@@ -507,11 +517,7 @@ public sealed partial class EditTextPage : Page
 
             var result = await dialog.ShowAsync();
             if (result == ContentDialogResult.Primary)
-            {
-                var dp = new DataPackage();
-                dp.SetText(text);
-                Clipboard.SetContent(dp);
-            }
+                ClipboardHelper.CopyText(text);
 
             StatusBarText.Text = "QR code generated";
         }

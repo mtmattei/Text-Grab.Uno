@@ -72,9 +72,7 @@ public class WindowsSystemTrayService : ISystemTrayService, IDisposable
                 ShowWindowRequested?.Invoke(this, EventArgs.Empty);
                 break;
             case WM_RBUTTONUP:
-                // For now, double-click = show, right-click = show
-                // Full context menu would require TrackPopupMenu
-                ShowWindowRequested?.Invoke(this, EventArgs.Empty);
+                ExitRequested?.Invoke(this, EventArgs.Empty);
                 break;
         }
     }

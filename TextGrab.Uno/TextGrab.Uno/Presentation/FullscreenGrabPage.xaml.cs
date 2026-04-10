@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Input;
+using SkiaSharp;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
 
@@ -8,10 +9,16 @@ namespace TextGrab.Presentation;
 public sealed partial class FullscreenGrabPage : Page
 {
     private bool _isSelecting;
+    private bool _isFrozen;
     private Point _startPoint;
     private IOcrService? _ocrService;
     private IScreenCaptureService? _captureService;
-    private Stream? _capturedScreen;
+    private byte[]? _capturedScreenBytes;
+
+    /// <summary>
+    /// Static property to pass captured text to EditTextPage after navigation.
+    /// </summary>
+    internal static string? PendingTextForEditText { get; set; }
 
     public FullscreenGrabPage()
     {
@@ -52,16 +59,21 @@ public sealed partial class FullscreenGrabPage : Page
             MinimizeWindow();
             await Task.Delay(200);
 
-            _capturedScreen = await _captureService.CaptureScreenAsync();
+            using var capturedStream = await _captureService.CaptureScreenAsync();
 
             MaximizeWindow();
 
-            if (_capturedScreen is not null)
+            if (capturedStream is not null)
             {
+                // Store raw bytes so they survive BitmapImage consuming the stream
+                using var ms = new MemoryStream();
+                await capturedStream.CopyToAsync(ms);
+                _capturedScreenBytes = ms.ToArray();
+
                 var bitmapImage = new BitmapImage();
-                await bitmapImage.SetSourceAsync(_capturedScreen.AsRandomAccessStream());
+                using var displayStream = new MemoryStream(_capturedScreenBytes);
+                await bitmapImage.SetSourceAsync(displayStream.AsRandomAccessStream());
                 BackgroundImage.Source = bitmapImage;
-                _capturedScreen.Position = 0;
                 StatusText.Text = "Draw a rectangle to capture text, or press Esc to cancel";
 
                 // Apply shade overlay from settings
@@ -100,6 +112,9 @@ public sealed partial class FullscreenGrabPage : Page
             }
         }
 
+        // Draggable toolbar
+        FloatingToolbar.ManipulationDelta += FloatingToolbar_ManipulationDelta;
+
         // Focus for keyboard input
         this.Focus(FocusState.Programmatic);
     }
@@ -109,8 +124,7 @@ public sealed partial class FullscreenGrabPage : Page
 #if WINDOWS
         RestoreWindow();
 #endif
-        _capturedScreen?.Dispose();
-        _capturedScreen = null;
+        _capturedScreenBytes = null;
     }
 
     // --- Window management (Windows-only) ---
@@ -155,6 +169,92 @@ public sealed partial class FullscreenGrabPage : Page
     private static extern bool ShowWindow(nint hWnd, int nCmdShow);
 #endif
 
+    // --- Toolbar drag ---
+
+    private void FloatingToolbar_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
+    {
+        double newX = ToolbarTranslate.X + e.Delta.Translation.X;
+        double newY = ToolbarTranslate.Y + e.Delta.Translation.Y;
+
+        // Clamp so toolbar stays within page bounds
+        double pageWidth = this.ActualWidth;
+        double pageHeight = this.ActualHeight;
+        double toolbarWidth = FloatingToolbar.ActualWidth;
+        double toolbarHeight = FloatingToolbar.ActualHeight;
+
+        double halfToolbar = toolbarWidth / 2.0;
+        double centerX = pageWidth / 2.0;
+
+        double minX = -(centerX - 50);
+        double maxX = centerX - 50;
+        double minY = -12;
+        double maxY = pageHeight - toolbarHeight - 12;
+
+        ToolbarTranslate.X = Math.Clamp(newX, minX, maxX);
+        ToolbarTranslate.Y = Math.Clamp(newY, minY, maxY);
+
+        e.Handled = true;
+    }
+
+    // --- Freeze ---
+
+    private async void Freeze_Click(object sender, RoutedEventArgs e)
+    {
+        await ToggleFreezeAsync();
+    }
+
+    private async Task ToggleFreezeAsync()
+    {
+#if WINDOWS
+        if (_captureService?.IsSupported != true) return;
+
+        _isFrozen = !_isFrozen;
+        FreezeToggle.IsChecked = _isFrozen;
+        FreezeCtxItem.IsChecked = _isFrozen;
+
+        if (_isFrozen)
+        {
+            // Remove overlay dimming for a clean "frozen screenshot" look
+            SelectionCanvas.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Microsoft.UI.Colors.Transparent);
+
+            StatusText.Text = "Frozen — draw to capture, press F to unfreeze";
+
+            // Re-capture the screen fresh (minimize → capture → restore)
+            MinimizeWindow();
+            await Task.Delay(200);
+
+            using var capturedStream = await _captureService!.CaptureScreenAsync();
+
+            MaximizeWindow();
+
+            if (capturedStream is not null)
+            {
+                using var ms = new MemoryStream();
+                await capturedStream.CopyToAsync(ms);
+                _capturedScreenBytes = ms.ToArray();
+
+                var bitmapImage = new BitmapImage();
+                using var displayStream = new MemoryStream(_capturedScreenBytes);
+                await bitmapImage.SetSourceAsync(displayStream.AsRandomAccessStream());
+                BackgroundImage.Source = bitmapImage;
+            }
+        }
+        else
+        {
+            // Restore shade overlay
+            var settings = GetService<IOptions<AppSettings>>();
+            if (settings?.Value?.FsgShadeOverlay != false)
+                SelectionCanvas.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                    Windows.UI.Color.FromArgb(0x60, 0, 0, 0));
+
+            StatusText.Text = "Draw a rectangle to capture text, or press Esc to cancel";
+        }
+
+        this.Focus(FocusState.Programmatic);
+#endif
+    }
+
     // --- Keyboard ---
 
     private void Page_KeyDown(object sender, KeyRoutedEventArgs e)
@@ -179,6 +279,10 @@ public sealed partial class FullscreenGrabPage : Page
                 break;
             case Windows.System.VirtualKey.E:
                 SendToEtwToggle.IsChecked = !SendToEtwToggle.IsChecked;
+                e.Handled = true;
+                break;
+            case Windows.System.VirtualKey.F:
+                _ = ToggleFreezeAsync();
                 e.Handled = true;
                 break;
         }
@@ -226,9 +330,11 @@ public sealed partial class FullscreenGrabPage : Page
         double w = SelectionBorder.Width;
         double h = SelectionBorder.Height;
 
+        // Small click = single-word selection
         if (w < 5 || h < 5)
         {
             SelectionBorder.Visibility = Visibility.Collapsed;
+            await RunWordSelectionAsync(_startPoint);
             return;
         }
 
@@ -242,6 +348,44 @@ public sealed partial class FullscreenGrabPage : Page
 
     // --- OCR ---
 
+    /// <summary>
+    /// Crops the selected region from the stored screenshot using SkiaSharp,
+    /// applying DPI scaling for accurate pixel coordinates.
+    /// </summary>
+    private Stream? CropRegionFromScreenshot(Rect dipRegion)
+    {
+        if (_capturedScreenBytes is null) return null;
+
+        using var skBitmap = SKBitmap.Decode(_capturedScreenBytes);
+        if (skBitmap is null) return null;
+
+        // Scale DIP coordinates to physical pixels
+        double scale = this.XamlRoot?.RasterizationScale ?? 1.0;
+        int x = (int)(dipRegion.X * scale);
+        int y = (int)(dipRegion.Y * scale);
+        int w = (int)(dipRegion.Width * scale);
+        int h = (int)(dipRegion.Height * scale);
+
+        // Clamp to bitmap bounds
+        x = Math.Clamp(x, 0, skBitmap.Width - 1);
+        y = Math.Clamp(y, 0, skBitmap.Height - 1);
+        w = Math.Clamp(w, 1, skBitmap.Width - x);
+        h = Math.Clamp(h, 1, skBitmap.Height - y);
+
+        var subset = new SKBitmap();
+        if (!skBitmap.ExtractSubset(subset, new SKRectI(x, y, x + w, y + h)))
+            return null;
+
+        var stream = new MemoryStream();
+        using var image = SKImage.FromBitmap(subset);
+        using var data = image.Encode(SKEncodedImageFormat.Png, 100);
+        data.SaveTo(stream);
+        stream.Position = 0;
+
+        subset.Dispose();
+        return stream;
+    }
+
     private async Task RunOcrOnRegionAsync(Rect region)
     {
         if (_ocrService is null) return;
@@ -251,18 +395,8 @@ public sealed partial class FullscreenGrabPage : Page
 
         try
         {
-            Stream? imageStream = null;
-
-#if WINDOWS
-            if (_captureService is not null)
-                imageStream = await _captureService.CaptureRegionAsync(region);
-#endif
-
-            if (imageStream is null && _capturedScreen is not null)
-            {
-                _capturedScreen.Position = 0;
-                imageStream = _capturedScreen;
-            }
+            // Crop from the stored screenshot (capture-once-crop-many pattern)
+            using var imageStream = CropRegionFromScreenshot(region);
 
             if (imageStream is null)
             {
@@ -282,7 +416,7 @@ public sealed partial class FullscreenGrabPage : Page
                 ? result.CleanedOutput
                 : result.RawOutput;
 
-            // Try barcode detection if enabled and OCR returned little/no text
+            // Try barcode detection if enabled
             var settings = GetService<IOptions<AppSettings>>();
             if (settings?.Value?.ReadBarcodesOnGrab == true && imageStream.CanSeek)
             {
@@ -306,23 +440,7 @@ public sealed partial class FullscreenGrabPage : Page
             if (SingleLineModeRadio.IsChecked == true || SingleLineCtxItem.IsChecked)
                 text = text.MakeStringSingleLine();
 
-            ClipboardHelper.CopyText(text);
-
-            // Notify
-            var notificationService = GetService<INotificationService>();
-            notificationService?.ShowSuccess($"Copied: {(text.Length > 60 ? text[..60] + "..." : text)}");
-
-            StatusText.Text = $"Copied {text.Length} chars ({result.Engine})";
-
-            // Auto-navigate back after successful grab
-            await Task.Delay(500);
-
-            if (SendToEtwToggle.IsChecked == true)
-            {
-                // Navigate to EditText — TODO: pass text data
-            }
-
-            Cancel_Click(this, new RoutedEventArgs());
+            await FinishGrabAsync(text, result.Engine);
         }
         catch (Exception ex)
         {
@@ -333,6 +451,87 @@ public sealed partial class FullscreenGrabPage : Page
             BusyRing.IsActive = false;
             SelectionBorder.Visibility = Visibility.Collapsed;
         }
+    }
+
+    /// <summary>
+    /// Single-click word selection: OCR the full image, find the word at the click point.
+    /// </summary>
+    private async Task RunWordSelectionAsync(Point clickPoint)
+    {
+        if (_ocrService is null || _capturedScreenBytes is null) return;
+
+        BusyRing.IsActive = true;
+        StatusText.Text = "Detecting word...";
+
+        try
+        {
+            using var stream = new MemoryStream(_capturedScreenBytes);
+            var result = await _ocrService.RecognizeAsync(stream);
+
+            if (result?.StructuredResult?.Lines is null)
+            {
+                StatusText.Text = "No text detected at click point";
+                return;
+            }
+
+            // Scale click point to match OCR coordinate space (OCR works on physical pixels)
+            double scale = this.XamlRoot?.RasterizationScale ?? 1.0;
+            double px = clickPoint.X * scale;
+            double py = clickPoint.Y * scale;
+
+            // Find word whose bounding box contains the click
+            string? foundWord = null;
+            foreach (var line in result.StructuredResult.Lines)
+            {
+                foreach (var word in line.Words)
+                {
+                    if (word.BoundingBox.Contains(new Point(px, py)))
+                    {
+                        foundWord = word.Text;
+                        break;
+                    }
+                }
+                if (foundWord is not null) break;
+            }
+
+            if (string.IsNullOrWhiteSpace(foundWord))
+            {
+                StatusText.Text = "No word found at click point";
+                return;
+            }
+
+            await FinishGrabAsync(foundWord, result.Engine);
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = $"Word detection failed: {ex.Message}";
+        }
+        finally
+        {
+            BusyRing.IsActive = false;
+        }
+    }
+
+    /// <summary>
+    /// Common finish: copy to clipboard, notify, optionally navigate to EditText.
+    /// </summary>
+    private async Task FinishGrabAsync(string text, OcrEngineKind engine)
+    {
+        ClipboardHelper.CopyText(text);
+
+        var notificationService = GetService<INotificationService>();
+        notificationService?.ShowSuccess($"Copied: {(text.Length > 60 ? text[..60] + "..." : text)}");
+
+        StatusText.Text = $"Copied {text.Length} chars ({engine})";
+
+        await Task.Delay(500);
+
+        if (SendToEtwToggle.IsChecked == true)
+        {
+            PendingTextForEditText = text;
+        }
+
+        Cancel_Click(this, new RoutedEventArgs());
     }
 
     // --- Fallback handlers ---
@@ -353,10 +552,9 @@ public sealed partial class FullscreenGrabPage : Page
 
         if (result is not null)
         {
-            var dp = new DataPackage();
-            dp.SetText(result.CleanedOutput ?? result.RawOutput);
-            Clipboard.SetContent(dp);
-            StatusText.Text = $"Copied {(result.CleanedOutput ?? result.RawOutput).Length} chars";
+            var text = result.GetBestText();
+            ClipboardHelper.CopyText(text);
+            StatusText.Text = $"Copied {text.Length} chars";
         }
         else
         {
@@ -390,10 +588,9 @@ public sealed partial class FullscreenGrabPage : Page
 
         if (result is not null)
         {
-            var dp = new DataPackage();
-            dp.SetText(result.CleanedOutput ?? result.RawOutput);
-            Clipboard.SetContent(dp);
-            StatusText.Text = $"Copied {(result.CleanedOutput ?? result.RawOutput).Length} chars";
+            var text = result.GetBestText();
+            ClipboardHelper.CopyText(text);
+            StatusText.Text = $"Copied {text.Length} chars";
         }
         else
         {
@@ -405,16 +602,21 @@ public sealed partial class FullscreenGrabPage : Page
 
     // --- Navigation ---
 
+    private void EscAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        args.Handled = true;
+        Cancel_Click(this, new RoutedEventArgs());
+    }
+
     private void Cancel_Click(object sender, RoutedEventArgs e)
     {
-        var navigator = GetService<INavigator>();
-        _ = navigator?.NavigateRouteAsync(this, "EditText");
+        // Use Frame.Navigate directly — INavigator doesn't drive ShellPage's manual navigation
+        this.Frame?.Navigate(typeof(EditTextPage));
     }
 
     private void Settings_Click(object sender, RoutedEventArgs e)
     {
-        var navigator = GetService<INavigator>();
-        _ = navigator?.NavigateRouteAsync(this, "Settings");
+        this.Frame?.Navigate(typeof(SettingsPage));
     }
 
     private T? GetService<T>() where T : class

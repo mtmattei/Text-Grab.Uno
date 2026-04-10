@@ -4,6 +4,10 @@
       NavigationCacheMode="Disabled"
       KeyDown="Page_KeyDown">
 
+  <Page.KeyboardAccelerators>
+    <KeyboardAccelerator Key="Escape" Invoked="EscAccelerator_Invoked" />
+  </Page.KeyboardAccelerators>
+
   <Grid Background="Black">
     <!-- Screen capture image fills entire page -->
     <Image x:Name="BackgroundImage"
@@ -29,6 +33,7 @@
         <MenuFlyout>
           <ToggleMenuFlyoutItem x:Name="SingleLineCtxItem" Text="Single Line Mode" />
           <ToggleMenuFlyoutItem x:Name="TableCtxItem" Text="Table Mode" />
+          <ToggleMenuFlyoutItem x:Name="FreezeCtxItem" Text="Freeze (F)" Click="Freeze_Click" />
           <ToggleMenuFlyoutItem x:Name="SendToEtwCtxItem" Text="Send to Edit Text" />
           <MenuFlyoutSeparator />
           <MenuFlyoutItem Text="Settings" Click="Settings_Click" />
@@ -45,11 +50,23 @@
             Padding="12,6"
             CornerRadius="8"
             Background="#E0202020"
+            ManipulationMode="TranslateX,TranslateY"
             Translation="0,0,32">
+      <Border.RenderTransform>
+        <TranslateTransform x:Name="ToolbarTranslate" />
+      </Border.RenderTransform>
       <Border.Shadow>
         <ThemeShadow />
       </Border.Shadow>
       <StackPanel Orientation="Horizontal" Spacing="8">
+        <FontIcon Glyph="&#xE76F;"
+                  FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                  Foreground="#80FFFFFF"
+                  FontSize="14"
+                  VerticalAlignment="Center"
+                  Margin="0,0,4,0"
+                  IsHitTestVisible="False"
+                  ToolTipService.ToolTip="Drag to move toolbar" />
         <ComboBox x:Name="LanguagesComboBox"
                   MinWidth="150"
                   PlaceholderText="Language" />
@@ -65,9 +82,18 @@
 
         <Border Width="1" Background="#40FFFFFF" Margin="4,2" />
 
+        <ToggleButton x:Name="FreezeToggle" Content="&#xE786;"
+                      FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                      ToolTipService.ToolTip="Freeze (F) — re-capture without overlay"
+                      Click="Freeze_Click" />
+
         <ToggleButton x:Name="SendToEtwToggle" Content="&#xE8A7;"
                       FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                      ToolTipService.ToolTip="Send to Edit Text" />
+                      ToolTipService.ToolTip="Send to Edit Text (E)" />
+
+        <Button Content="&#xE713;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                ToolTipService.ToolTip="Settings"
+                Click="Settings_Click" />
 
         <Button Content="&#xE711;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
                 ToolTipService.ToolTip="Cancel (Esc)"

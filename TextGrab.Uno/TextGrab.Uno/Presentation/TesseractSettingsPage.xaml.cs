@@ -62,9 +62,7 @@ public sealed partial class TesseractSettingsPage : Page
 
     private void CopyWinGetButton_Click(object sender, RoutedEventArgs e)
     {
-        var dataPackage = new DataPackage();
-        dataPackage.SetText("winget install -e --id UB-Mannheim.TesseractOCR");
-        Clipboard.SetContent(dataPackage);
+        ClipboardHelper.CopyText("winget install -e --id UB-Mannheim.TesseractOCR");
     }
 
     private void OpenPathButton_Click(object sender, RoutedEventArgs e)

@@ -33,8 +33,31 @@ public sealed partial class ShellPage : Page
         }
     }
 
+    private void ContentFrame_Navigated(object sender, Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
+    {
+        bool isFullscreenGrab = e.SourcePageType == typeof(FullscreenGrabPage);
+        SetFullscreenGrabMode(isFullscreenGrab);
+    }
+
+    public void SetFullscreenGrabMode(bool isFullscreenGrab)
+    {
+        if (isFullscreenGrab)
+        {
+            NavView.IsPaneVisible = false;
+            NavView.PaneDisplayMode = NavigationViewPaneDisplayMode.LeftMinimal;
+            NavView.IsPaneToggleButtonVisible = false;
+        }
+        else
+        {
+            NavView.IsPaneVisible = true;
+            NavView.PaneDisplayMode = NavigationViewPaneDisplayMode.LeftCompact;
+            NavView.IsPaneToggleButtonVisible = true;
+        }
+    }
+
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        ContentFrame.Navigated += ContentFrame_Navigated;
         // Wire notification host
         var notificationService = ((App)Application.Current).Host?.Services
             .GetService<InAppNotificationService>();
