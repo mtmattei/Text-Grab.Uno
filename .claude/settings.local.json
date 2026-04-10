@@ -11,7 +11,21 @@
       "Bash(dotnet build:*)",
       "Bash(dotnet test:*)",
       "Bash(gh pr list:*)",
-      "Bash(/mnt/c/Program Files/dotnet/dotnet.exe:*)"
+      "Bash(/mnt/c/Program Files/dotnet/dotnet.exe:*)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\([f for f in d.get\\(''''XamlFiles'''',[]\\) if ''''Word'''' in f.get\\(''''FullPath'''',''''''''\\)], indent=2\\)\\)\")",
+      "mcp__uno__uno_platform_docs_search",
+      "mcp__uno__uno_platform_docs_fetch",
+      "Bash(tasklist)",
+      "Bash(taskkill /IM TextGrab.Uno.exe /F)",
+      "Bash(cp \"C:/Users/Platform006/.claude/projects/C--Users-Platform006-OneDrive---Uno-Platform-Desktop-unOS-AI-builds-Text-Grab/memory/migration_patterns.md\" \"C:/Users/Platform006/Desktop/WPF-to-Uno-Migration-Patterns.md\")",
+      "Bash(cp \"C:/Users/Platform006/.claude/projects/C--Users-Platform006-OneDrive---Uno-Platform-Desktop-unOS-AI-builds-Text-Grab/memory/phase_progress.md\" \"C:/Users/Platform006/Desktop/WPF-to-Uno-Phase-Progress.md\")",
+      "Bash(cp \"C:/Users/Platform006/.claude/projects/C--Users-Platform006-OneDrive---Uno-Platform-Desktop-unOS-AI-builds-Text-Grab/memory/migration_patterns.md\" \"C:/Users/Platform006/OneDrive - Uno Platform/Desktop/WPF-to-Uno-Migration-Patterns.md\")",
+      "Bash(cp \"C:/Users/Platform006/.claude/projects/C--Users-Platform006-OneDrive---Uno-Platform-Desktop-unOS-AI-builds-Text-Grab/memory/phase_progress.md\" \"C:/Users/Platform006/OneDrive - Uno Platform/Desktop/WPF-to-Uno-Phase-Progress.md\")",
+      "Bash(xargs wc:*)",
+      "Bash(__NEW_LINE_66976673f403dfed__ 'WPF_DIR=/c/Users/Platform006/OneDrive - Uno Platform/Desktop/unOS/AI-builds/Text-Grab/Text-Grab' __NEW_LINE_66976673f403dfed__ echo '=== WPF VIEWS/PAGES ===' find $WPF_DIR/Views $WPF_DIR/Pages -type f -name *.xaml ! -path */obj/* ! -path */bin/*)",
+      "Bash(__NEW_LINE_f9ef763f749f52b6__ 'UNO_DIR=/c/Users/Platform006/OneDrive - Uno Platform/Desktop/unOS/AI-builds/Text-Grab/TextGrab.Uno/TextGrab.Uno' __NEW_LINE_f9ef763f749f52b6__ echo '=== UNO PRESENTATION \\(Pages + Models\\) ===' ls $UNO_DIR/Presentation/*.xaml)",
+      "Bash(sed 's/.*\\\\.//')",
+      "Bash(taskkill:*)"
     ],
     "deny": []
   }
