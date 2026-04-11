@@ -68,8 +68,10 @@
                   IsHitTestVisible="False"
                   ToolTipService.ToolTip="Drag to move toolbar" />
         <ComboBox x:Name="LanguagesComboBox"
-                  MinWidth="150"
-                  PlaceholderText="Language" />
+                  MinWidth="180"
+                  PlaceholderText="Language"
+                  DisplayMemberPath="DisplayName"
+                  SelectionChanged="LanguagesComboBox_SelectionChanged" />
 
         <Border Width="1" Background="{StaticResource ToolbarSeparatorBrush}" Margin="4,2" />
 
@@ -90,6 +92,15 @@
         <ToggleButton x:Name="SendToEtwToggle" Content="&#xE8A7;"
                       FontFamily="{ThemeResource SymbolThemeFontFamily}"
                       ToolTipService.ToolTip="Send to Edit Text (E)" />
+
+        <DropDownButton x:Name="PostGrabActionsButton"
+                        Content="&#xE90F;"
+                        FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                        ToolTipService.ToolTip="Post-grab actions">
+          <DropDownButton.Flyout>
+            <MenuFlyout x:Name="PostGrabActionsFlyout" />
+          </DropDownButton.Flyout>
+        </DropDownButton>
 
         <Button Content="&#xE713;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
                 ToolTipService.ToolTip="Settings"

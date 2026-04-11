@@ -147,6 +147,64 @@ public static partial class OcrUtilities
         return scaleFactor;
     }
 
+    /// <summary>
+    /// Converts an OCR result into a flat list of WordBorderInfo objects
+    /// suitable for ResultTable analysis.
+    /// </summary>
+    public static List<WordBorderInfo> ToWordBorderInfos(this IOcrLinesWords ocrResult)
+    {
+        List<WordBorderInfo> infos = [];
+        int lineNumber = 0;
+
+        foreach (IOcrLine line in ocrResult.Lines)
+        {
+            foreach (IOcrWord word in line.Words)
+            {
+                infos.Add(new WordBorderInfo
+                {
+                    Word = word.Text,
+                    BorderRect = word.BoundingBox,
+                    LineNumber = lineNumber,
+                });
+            }
+            lineNumber++;
+        }
+
+        return infos;
+    }
+
+    /// <summary>
+    /// Formats OCR result as a tab-separated table by analyzing word positions.
+    /// </summary>
+    public static string FormatAsTable(IOcrLinesWords ocrResult, ILanguage language)
+    {
+        var wordBorderInfos = ocrResult.ToWordBorderInfos();
+        if (wordBorderInfos.Count == 0)
+            return string.Empty;
+
+        // Compute overall bounds for the canvas rectangle
+        double leftsMin = wordBorderInfos.Min(x => x.BorderRect.Left);
+        double topsMin = wordBorderInfos.Min(x => x.BorderRect.Top);
+        double rightsMax = wordBorderInfos.Max(x => x.BorderRect.Right);
+        double bottomsMax = wordBorderInfos.Max(x => x.BorderRect.Bottom);
+
+        const int buffer = 3;
+        Rectangle canvasRect = new()
+        {
+            X = (int)leftsMin - buffer,
+            Y = (int)topsMin - buffer,
+            Width = (int)(rightsMax - leftsMin) + buffer * 2,
+            Height = (int)(bottomsMax - topsMin) + buffer * 2,
+        };
+
+        ResultTable table = new();
+        table.AnalyzeAsTable(wordBorderInfos, canvasRect, drawTable: false);
+
+        StringBuilder sb = new();
+        ResultTable.GetTextFromTabledWordBorders(sb, wordBorderInfos, language.IsSpaceJoining());
+        return sb.ToString();
+    }
+
     // Matches words in a space-joining language context:
     // - one letter that is not CJK ("other letters")
     // - one number digit

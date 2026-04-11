@@ -37,14 +37,18 @@ public sealed partial class FullscreenGrabPage : Page
         MaximizeWindow();
 #endif
 
-        // Load languages
+        // Load languages — store ILanguage objects so selection drives OCR engine routing
         var langService = this.GetService<ILanguageService>();
         if (langService is not null)
         {
-            foreach (var lang in langService.GetAllLanguages())
-                LanguagesComboBox.Items.Add(lang.DisplayName);
-            if (LanguagesComboBox.Items.Count > 0)
-                LanguagesComboBox.SelectedIndex = 0;
+            var allLanguages = langService.GetAllLanguages();
+            var currentLang = langService.GetOcrLanguage();
+            foreach (var lang in allLanguages)
+                LanguagesComboBox.Items.Add(lang);
+
+            // Select last-used language
+            var selected = allLanguages.FirstOrDefault(l => l.LanguageTag == currentLang.LanguageTag);
+            LanguagesComboBox.SelectedItem = selected ?? allLanguages.FirstOrDefault();
         }
 
 #if WINDOWS
@@ -103,6 +107,9 @@ public sealed partial class FullscreenGrabPage : Page
                 default: NormalModeRadio.IsChecked = true; break;
             }
         }
+
+        // Populate Post-Grab Actions menu
+        PopulatePostGrabActionsMenu(appSettings?.Value?.PostGrabActionsEnabled ?? "");
 
         // Draggable toolbar
         FloatingToolbar.ManipulationDelta += FloatingToolbar_ManipulationDelta;
@@ -401,7 +408,8 @@ public sealed partial class FullscreenGrabPage : Page
                 return;
             }
 
-            var result = await _ocrService.RecognizeAsync(imageStream);
+            var selectedLang = LanguagesComboBox.SelectedItem as ILanguage;
+            var result = await _ocrService.RecognizeAsync(imageStream, selectedLang);
             if (result is null)
             {
                 StatusText.Text = "OCR returned no results — try a larger selection";
@@ -431,9 +439,21 @@ public sealed partial class FullscreenGrabPage : Page
                 }
             }
 
-            // Apply mode
-            if (SingleLineModeRadio.IsChecked == true || SingleLineCtxItem.IsChecked)
+            // Apply mode — Table takes precedence, then Single Line
+            bool tableMode = TableModeRadio.IsChecked == true || TableCtxItem.IsChecked;
+            bool singleLineMode = SingleLineModeRadio.IsChecked == true || SingleLineCtxItem.IsChecked;
+
+            if (tableMode && result.StructuredResult is not null)
+            {
+                var lang = LanguagesComboBox.SelectedItem as ILanguage
+                    ?? this.GetService<ILanguageService>()?.GetOcrLanguage();
+                if (lang is not null)
+                    text = OcrUtilities.FormatAsTable(result.StructuredResult, lang);
+            }
+            else if (singleLineMode)
+            {
                 text = text.MakeStringSingleLine();
+            }
 
             await FinishGrabAsync(text, result.Engine);
         }
@@ -461,7 +481,8 @@ public sealed partial class FullscreenGrabPage : Page
         try
         {
             using var stream = new MemoryStream(_capturedScreenBytes);
-            var result = await _ocrService.RecognizeAsync(stream);
+            var selectedLang = LanguagesComboBox.SelectedItem as ILanguage;
+            var result = await _ocrService.RecognizeAsync(stream, selectedLang);
 
             if (result?.StructuredResult?.Lines is null)
             {
@@ -508,10 +529,20 @@ public sealed partial class FullscreenGrabPage : Page
     }
 
     /// <summary>
-    /// Common finish: copy to clipboard, notify, optionally navigate to EditText.
+    /// Common finish: apply post-grab actions, copy to clipboard, notify, optionally navigate to EditText.
     /// </summary>
     private async Task FinishGrabAsync(string text, OcrEngineKind engine)
     {
+        // Apply post-grab actions (Fix GUIDs, Trim lines, Remove dupes, Web Search)
+        var settings = this.GetService<IOptions<AppSettings>>();
+        if (settings?.Value is not null)
+        {
+            var enabled = PostGrabActionManager.ParseEnabled(settings.Value.PostGrabActionsEnabled);
+            if (enabled.Count > 0)
+                text = await PostGrabActionManager.ApplyEnabledActionsAsync(
+                    text, enabled, settings.Value.WebSearchUrl);
+        }
+
         ClipboardHelper.CopyText(text);
 
         var notificationService = this.GetService<INotificationService>();
@@ -527,6 +558,51 @@ public sealed partial class FullscreenGrabPage : Page
         }
 
         Cancel_Click(this, new RoutedEventArgs());
+    }
+
+    // --- Post-grab actions menu ---
+
+    private void PopulatePostGrabActionsMenu(string enabledCsv)
+    {
+        PostGrabActionsFlyout.Items.Clear();
+        var enabled = PostGrabActionManager.ParseEnabled(enabledCsv);
+
+        foreach (var action in PostGrabActionManager.AllActions)
+        {
+            var item = new ToggleMenuFlyoutItem
+            {
+                Text = action.Label,
+                Icon = new FontIcon
+                {
+                    Glyph = action.Glyph,
+                    FontFamily = (Microsoft.UI.Xaml.Media.FontFamily)Application.Current.Resources["SymbolThemeFontFamily"],
+                },
+                IsChecked = enabled.Contains(action.ActionId),
+                Tag = action.ActionId,
+            };
+            item.Click += PostGrabActionItem_Click;
+            PostGrabActionsFlyout.Items.Add(item);
+        }
+    }
+
+    private async void PostGrabActionItem_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not ToggleMenuFlyoutItem item || item.Tag is not string key)
+            return;
+
+        var writable = this.GetService<IWritableOptions<AppSettings>>();
+        if (writable is null) return;
+
+        // Build the updated enabled set from current menu state
+        var enabled = new HashSet<string>();
+        foreach (var child in PostGrabActionsFlyout.Items.OfType<ToggleMenuFlyoutItem>())
+            if (child.IsChecked && child.Tag is string k)
+                enabled.Add(k);
+
+        await writable.UpdateAsync(s => s with
+        {
+            PostGrabActionsEnabled = PostGrabActionManager.SerializeEnabled(enabled)
+        });
     }
 
     // --- Fallback handlers ---
@@ -614,4 +690,15 @@ public sealed partial class FullscreenGrabPage : Page
         this.Frame?.Navigate(typeof(SettingsPage));
     }
 
+    // --- Language picker ---
+
+    private async void LanguagesComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (LanguagesComboBox.SelectedItem is not ILanguage lang) return;
+
+        // Persist last-used language so next launch and OcrService default match
+        var writable = this.GetService<IWritableOptions<AppSettings>>();
+        if (writable is not null)
+            await writable.UpdateAsync(s => s with { LastUsedLang = lang.LanguageTag });
+    }
 }

@@ -43,6 +43,8 @@ public record AppSettings
     public bool FsgSendEtwToggle { get; init; } = false;
     public string FsgDefaultMode { get; init; } = "Default";
     public bool PostGrabStayOpen { get; init; } = false;
+    // Enabled post-grab action keys (comma-separated)
+    public string PostGrabActionsEnabled { get; init; } = "";
 
     // Grab Frame
     public double GrabFrameWidth { get; init; } = 800;
