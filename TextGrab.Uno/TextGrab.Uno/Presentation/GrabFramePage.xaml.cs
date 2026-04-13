@@ -28,10 +28,26 @@ public sealed partial class GrabFramePage : Page, IGrabFrameHost
     private DispatcherTimer _searchTimer = new() { Interval = TimeSpan.FromMilliseconds(300) };
     private byte[]? _currentImageData;
 
+    /// <summary>
+    /// Static handoff from FullscreenGrab — when set, GrabFramePage loads this
+    /// image on navigation instead of waiting for the user to pick a file.
+    /// </summary>
+    internal static byte[]? PendingImageBytes { get; set; }
+
     public GrabFramePage()
     {
         InitializeComponent();
         _searchTimer.Tick += SearchTimer_Tick;
+        Loaded += OnPageLoaded;
+    }
+
+    private async void OnPageLoaded(object sender, RoutedEventArgs e)
+    {
+        if (PendingImageBytes is { Length: > 0 } bytes)
+        {
+            PendingImageBytes = null;
+            await LoadImage(bytes);
+        }
     }
 
     // --- IGrabFrameHost ---

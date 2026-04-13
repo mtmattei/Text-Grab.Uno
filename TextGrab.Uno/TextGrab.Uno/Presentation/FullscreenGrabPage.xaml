@@ -9,25 +9,59 @@
   </Page.KeyboardAccelerators>
 
   <Grid Background="Black">
-    <!-- Screen capture image fills entire page -->
-    <Image x:Name="BackgroundImage"
-           Stretch="UniformToFill"
-           HorizontalAlignment="Stretch"
-           VerticalAlignment="Stretch" />
+    <!-- Zoom/pan wrapper: contains BackgroundImage + SelectionCanvas so they scale together.
+         Toolbar is a sibling so it stays at fixed size and position. -->
+    <Grid x:Name="ZoomWrapper"
+          HorizontalAlignment="Stretch"
+          VerticalAlignment="Stretch"
+          PointerWheelChanged="ZoomWrapper_PointerWheelChanged">
+      <Grid.RenderTransform>
+        <TransformGroup>
+          <ScaleTransform x:Name="ZoomScale" ScaleX="1" ScaleY="1" />
+          <TranslateTransform x:Name="ZoomTranslate" X="0" Y="0" />
+        </TransformGroup>
+      </Grid.RenderTransform>
 
-    <!-- Semi-transparent overlay Canvas for region selection -->
-    <Canvas x:Name="SelectionCanvas"
-            Background="{StaticResource ShadeOverlayBrush}"
-            PointerPressed="Canvas_PointerPressed"
-            PointerMoved="Canvas_PointerMoved"
-            PointerReleased="Canvas_PointerReleased">
+      <!-- Screen capture image fills entire page -->
+      <Image x:Name="BackgroundImage"
+             Stretch="UniformToFill"
+             HorizontalAlignment="Stretch"
+             VerticalAlignment="Stretch" />
+
+      <!-- Semi-transparent overlay Canvas for region selection -->
+      <Canvas x:Name="SelectionCanvas"
+              Background="Transparent"
+              PointerPressed="Canvas_PointerPressed"
+              PointerMoved="Canvas_PointerMoved"
+              PointerReleased="Canvas_PointerReleased">
+
+      <!-- Four shade rectangles that darken everything *outside* the selection.
+           When SelectionBorder is collapsed, ShadeTop covers the whole canvas. -->
+      <Rectangle x:Name="ShadeTop"    Fill="{StaticResource ShadeOverlayBrush}" IsHitTestVisible="False" />
+      <Rectangle x:Name="ShadeBottom" Fill="{StaticResource ShadeOverlayBrush}" IsHitTestVisible="False" />
+      <Rectangle x:Name="ShadeLeft"   Fill="{StaticResource ShadeOverlayBrush}" IsHitTestVisible="False" />
+      <Rectangle x:Name="ShadeRight"  Fill="{StaticResource ShadeOverlayBrush}" IsHitTestVisible="False" />
 
       <!-- Selection rectangle -->
       <Border x:Name="SelectionBorder"
               BorderBrush="{ThemeResource PrimaryBrush}"
               BorderThickness="2"
-              Background="{StaticResource SelectionOverlayBrush}"
+              Background="Transparent"
               Visibility="Collapsed" />
+
+      <!-- Size readout during drag -->
+      <Border x:Name="SizeReadout"
+              Background="{StaticResource ToolbarBackgroundBrush}"
+              CornerRadius="4"
+              Padding="6,2"
+              IsHitTestVisible="False"
+              Visibility="Collapsed">
+        <TextBlock x:Name="SizeReadoutText"
+                   Foreground="White"
+                   FontSize="12"
+                   FontWeight="SemiBold"
+                   Text="" />
+      </Border>
 
       <Canvas.ContextFlyout>
         <MenuFlyout>
@@ -40,7 +74,8 @@
           <MenuFlyoutItem Text="Cancel" Click="Cancel_Click" />
         </MenuFlyout>
       </Canvas.ContextFlyout>
-    </Canvas>
+      </Canvas>
+    </Grid>
 
     <!-- Floating toolbar (top center, dark translucent) -->
     <Border x:Name="FloatingToolbar"
@@ -88,6 +123,11 @@
                       FontFamily="{ThemeResource SymbolThemeFontFamily}"
                       ToolTipService.ToolTip="Freeze (F) — re-capture without overlay"
                       Click="Freeze_Click" />
+
+        <ToggleButton x:Name="GrabFrameToggle" Content="&#xE8B9;"
+                      FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                      ToolTipService.ToolTip="Grab Frame (G) — draw a region to open it as a Grab Frame"
+                      Click="GrabFrame_Click" />
 
         <ToggleButton x:Name="SendToEtwToggle" Content="&#xE8A7;"
                       FontFamily="{ThemeResource SymbolThemeFontFamily}"
